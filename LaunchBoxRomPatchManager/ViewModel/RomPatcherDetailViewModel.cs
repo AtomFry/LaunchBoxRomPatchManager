@@ -159,9 +159,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 && Platforms.All(p => !p.HasErrors)
                 && 
                 (
-                    RomPatcher.IsChanged
-                    || 
-                    Platforms.Any(p => p.IsChanged)
+                    RomPatcher.Platforms.IsChanged || RomPatcher.IsChanged
                 );
         }
 
@@ -171,7 +169,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
             if (messageDialogResult == MessageDialogResult.OK)
             {
-
                 _romPatcherDataProvider.DeleteRomPatcher(RomPatcher.Id);
 
                 // publish an event notifying that a rom patcher is deleted
@@ -182,6 +179,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private void OnRemovePlatformExecute()
         {
             SelectedRomPatcherPlatform.PropertyChanged -= RomPatcherPlatformWrapper_PropertyChanged;
+            RomPatcher.Platforms.Remove(SelectedRomPatcherPlatform);
             RomPatcher.Model.Platforms.Remove(SelectedRomPatcherPlatform.Model);
             Platforms.Remove(SelectedRomPatcherPlatform);
             SelectedRomPatcherPlatform = null;

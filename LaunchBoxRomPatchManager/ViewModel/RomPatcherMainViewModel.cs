@@ -49,7 +49,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         {
             // prompt before discarding any changes
             if(RomPatcherDetailViewModel?.RomPatcher != null 
-                && RomPatcherDetailViewModel.RomPatcher.IsChanged)
+                && (RomPatcherDetailViewModel.RomPatcher.IsChanged || RomPatcherDetailViewModel.RomPatcher.Platforms.IsChanged))
             {
                 MessageDialogResult result = MessageDialogHelper.ShowOKCancelDialog("Unsaved changes will be lost, discard changes?", "Discard changes");
                 if(result == MessageDialogResult.Cancel)
