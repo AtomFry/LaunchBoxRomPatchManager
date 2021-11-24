@@ -36,6 +36,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -51,7 +53,14 @@
         <Label Grid.Row="6" Content="Command line" Margin="10 0"/>
         <TextBox Grid.Row="7" Text="{Binding RomPatcher.CommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
 
-        <DockPanel Grid.Row="8" Margin="10">
+        <Label Grid.Row="8" Content="Platform" Margin="10 0"/>
+        <ComboBox Grid.Row="9" ItemsSource="{Binding PlatformLookup}"
+                  DisplayMemberPath="DisplayValue"
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding RomPatcher.PlatformId, Mode=TwoWay}"
+                  Margin="10 0 10 10"/>
+
+        <DockPanel Grid.Row="10" Margin="10">
             <StackPanel DockPanel.Dock="Right">
                 <Button Content="Add" Width="125" Margin="10" Command="{Binding AddPlatformCommand}"/>
                 <Button Content="Remove" Width="125" Margin="10" Command="{Binding RemovePlatformCommand}"/>
@@ -66,7 +75,7 @@
             </DataGrid>
         </DockPanel>
         
-        <StackPanel Grid.Row="9" Orientation="Horizontal">
+        <StackPanel Grid.Row="11" Orientation="Horizontal">
             <Button Content="Save" Width="125" Margin="10" Command="{Binding SaveCommand}"/>
             <Button Content="Delete" Width="125" Margin="10" Command="{Binding DeleteCommand}"/>
         </StackPanel>

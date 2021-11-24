@@ -16,6 +16,7 @@ namespace LaunchBoxRomPatchManager.ModelWrapper
 
         protected override void InitializeCollectionProperties(RomPatcher model)
         {
+            /*
             if(model.Emulators == null)
             {
                 throw new ArgumentException("Emulators cannot be null");
@@ -31,6 +32,7 @@ namespace LaunchBoxRomPatchManager.ModelWrapper
 
             Platforms = new ChangeTrackingCollection<RomPatcherPlatformWrapper>(model.Platforms.Select(p => new RomPatcherPlatformWrapper(p)));
             RegisterCollection(Platforms, model.Platforms);
+            */
         }
 
         public string Id
@@ -73,10 +75,18 @@ namespace LaunchBoxRomPatchManager.ModelWrapper
 
         public bool CommandLineIsChanged => GetIsChanged(nameof(CommandLine));
 
+        public string PlatformId
+        {
+            get { return GetValue<string>(); }
+            set { SetValue(value); }
+        }
 
-        public ChangeTrackingCollection<RomPatcherEmulatorWrapper> Emulators { get; private set; }
+        public string PlatformIdOriginalValue => GetOriginalValue<string>(nameof(PlatformId));
+        public bool PlatformIdIsChanged => GetIsChanged(nameof(PlatformId));
+
+        // public ChangeTrackingCollection<RomPatcherEmulatorWrapper> Emulators { get; private set; }
         
-        public ChangeTrackingCollection<RomPatcherPlatformWrapper> Platforms { get; private set; }
+        // public ChangeTrackingCollection<RomPatcherPlatformWrapper> Platforms { get; private set; }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

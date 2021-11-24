@@ -6,4 +6,9 @@
 
         public string DisplayValue { get; set; }
     }
+
+    public class NullLookupItem : LookupItem
+    {
+        public new string Id { get { return null; } }
+    }
 }

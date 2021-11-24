@@ -1,4 +1,5 @@
 ﻿using LaunchBoxRomPatchManager.DataProvider;
+using LaunchBoxRomPatchManager.DataProvider.Lookups;
 using LaunchBoxRomPatchManager.Event;
 using LaunchBoxRomPatchManager.Helpers;
 using LaunchBoxRomPatchManager.Model;
@@ -6,6 +7,7 @@ using LaunchBoxRomPatchManager.ModelWrapper;
 using Prism.Commands;
 using Prism.Events;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -15,32 +17,51 @@ namespace LaunchBoxRomPatchManager.ViewModel
     {
         private RomPatcherWrapper _romPatcher;
         private RomPatcherDataProvider _romPatcherDataProvider;
+        private PlatformLookupProvider _platformLookupProvider;
         private IEventAggregator _eventAggregator;
 
         public RomPatcherDetailViewModel()
         {
             _eventAggregator = EventAggregatorHelper.Instance.EventAggregator;
             _romPatcherDataProvider = new RomPatcherDataProvider();
+            _platformLookupProvider = new PlatformLookupProvider();
 
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
             DeleteCommand = new DelegateCommand(OnDeleteExecute);
+
+            PlatformLookup = new ObservableCollection<LookupItem>();
         }
 
-
         public void Load(string romPatcherId)
+        {
+            InitializeRomPatcher(romPatcherId);
+
+            LoadPlatformLookup();
+
+            InvalidateCommands();
+        }
+
+        private void InitializeRomPatcher(string romPatcherId)
         {
             RomPatcher romPatcher = (!string.IsNullOrWhiteSpace(romPatcherId))
                 ? _romPatcherDataProvider.GetRomPatcherById(romPatcherId)
                 : CreateNewRomPatcher();
 
-            
             RomPatcher = new RomPatcherWrapper(romPatcher);
 
             RomPatcher.PropertyChanged += RomPatcher_PropertyChanged;
-
-            InvalidateCommands();
         }
 
+        private void LoadPlatformLookup()
+        {            
+            PlatformLookup.Clear();
+            PlatformLookup.Add(new NullLookupItem());
+            IEnumerable<LookupItem> lookup = _platformLookupProvider.GetLookup();
+            foreach (LookupItem lookupItem in lookup)
+            {
+                PlatformLookup.Add(lookupItem);
+            }
+        }
 
         private void RomPatcher_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -126,8 +147,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private RomPatcher CreateNewRomPatcher()
         {
             RomPatcher romPatcher = new RomPatcher();
-            romPatcher.Emulators = new System.Collections.Generic.List<RomPatcherEmulator>();
-            romPatcher.Platforms = new System.Collections.Generic.List<RomPatcherPlatform>();
+            // romPatcher.Emulators = new System.Collections.Generic.List<RomPatcherEmulator>();
+            // romPatcher.Platforms = new System.Collections.Generic.List<RomPatcherPlatform>();
             return romPatcher;
         }
     }
