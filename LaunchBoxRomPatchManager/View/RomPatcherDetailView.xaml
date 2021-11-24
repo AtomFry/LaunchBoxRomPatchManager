@@ -25,11 +25,26 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="DataGridColumnStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DataGridEditingColumnStyle" TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid >
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -53,29 +68,24 @@
         <Label Grid.Row="6" Content="Command line" Margin="10 0"/>
         <TextBox Grid.Row="7" Text="{Binding RomPatcher.CommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
 
-        <Label Grid.Row="8" Content="Platform" Margin="10 0"/>
-        <ComboBox Grid.Row="9" ItemsSource="{Binding PlatformLookup}"
-                  DisplayMemberPath="DisplayValue"
-                  SelectedValuePath="Id"
-                  SelectedValue="{Binding RomPatcher.PlatformId, Mode=TwoWay}"
-                  Margin="10 0 10 10"/>
-
-        <DockPanel Grid.Row="10" Margin="10">
+        <DockPanel Grid.Row="8" Margin="10">
             <StackPanel DockPanel.Dock="Right">
                 <Button Content="Add" Width="125" Margin="10" Command="{Binding AddPlatformCommand}"/>
                 <Button Content="Remove" Width="125" Margin="10" Command="{Binding RemovePlatformCommand}"/>
             </StackPanel>
             <DataGrid ItemsSource="{Binding Platforms}"
-                      SelectedItem="{Binding SelectedPlatform, Mode=TwoWay}"
+                      SelectedItem="{Binding SelectedRomPatcherPlatform, Mode=TwoWay}"
                       AutoGenerateColumns="False" RowHeaderWidth="0">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Platforms" Width="*" 
-                                        Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        ElementStyle="{StaticResource DataGridColumnStyle}"
+                                        EditingElementStyle="{StaticResource DataGridEditingColumnStyle}"
+                                        Binding="{Binding PlatformId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>
         
-        <StackPanel Grid.Row="11" Orientation="Horizontal">
+        <StackPanel Grid.Row="9" Orientation="Horizontal">
             <Button Content="Save" Width="125" Margin="10" Command="{Binding SaveCommand}"/>
             <Button Content="Delete" Width="125" Margin="10" Command="{Binding DeleteCommand}"/>
         </StackPanel>

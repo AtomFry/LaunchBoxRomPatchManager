@@ -75,15 +75,6 @@ namespace LaunchBoxRomPatchManager.ModelWrapper
 
         public bool CommandLineIsChanged => GetIsChanged(nameof(CommandLine));
 
-        public string PlatformId
-        {
-            get { return GetValue<string>(); }
-            set { SetValue(value); }
-        }
-
-        public string PlatformIdOriginalValue => GetOriginalValue<string>(nameof(PlatformId));
-        public bool PlatformIdIsChanged => GetIsChanged(nameof(PlatformId));
-
         // public ChangeTrackingCollection<RomPatcherEmulatorWrapper> Emulators { get; private set; }
         
         // public ChangeTrackingCollection<RomPatcherPlatformWrapper> Platforms { get; private set; }

@@ -9,8 +9,7 @@ namespace LaunchBoxRomPatchManager.Model
     {
         public RomPatcher()
         {
-            // Platforms = new List<RomPatcherPlatform>();
-            // Emulators = new List<RomPatcherEmulator>();
+            Platforms = new List<RomPatcherPlatform>();            
         }
 
         public string Id { get; set; }
@@ -21,9 +20,6 @@ namespace LaunchBoxRomPatchManager.Model
 
         public string CommandLine { get; set; }
 
-        // public List<RomPatcherPlatform> Platforms { get; set; }
-        // public List<RomPatcherEmulator> Emulators { get; set; }
-
-        public string PlatformId { get; set; }        
+        public List<RomPatcherPlatform> Platforms { get; set; }        
     }
 }

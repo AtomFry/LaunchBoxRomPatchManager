@@ -9,6 +9,7 @@ using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace LaunchBoxRomPatchManager.ViewModel
@@ -29,31 +30,57 @@ namespace LaunchBoxRomPatchManager.ViewModel
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
             DeleteCommand = new DelegateCommand(OnDeleteExecute);
 
+            AddPlatformCommand = new DelegateCommand(OnAddPlatformExecute);
+            RemovePlatformCommand = new DelegateCommand(OnRemovePlatformExecute, OnRemotePlatformCanExecute);
+
             PlatformLookup = new ObservableCollection<LookupItem>();
+            Platforms = new ObservableCollection<RomPatcherPlatformWrapper>();
         }
 
         public void Load(string romPatcherId)
-        {
-            InitializeRomPatcher(romPatcherId);
-
-            LoadPlatformLookup();
-
-            InvalidateCommands();
-        }
-
-        private void InitializeRomPatcher(string romPatcherId)
         {
             RomPatcher romPatcher = (!string.IsNullOrWhiteSpace(romPatcherId))
                 ? _romPatcherDataProvider.GetRomPatcherById(romPatcherId)
                 : CreateNewRomPatcher();
 
-            RomPatcher = new RomPatcherWrapper(romPatcher);
+            InitializeRomPatcher(romPatcher);
 
+            LoadPlatformLookup();
+
+            LoadRomPatcherPlatforms(romPatcher.Platforms);
+
+            InvalidateCommands();
+        }
+
+        private void LoadRomPatcherPlatforms(List<RomPatcherPlatform> platforms)
+        {
+            foreach (var wrapper in Platforms)
+            {
+                wrapper.PropertyChanged -= RomPatcherPlatformWrapper_PropertyChanged;
+            }
+            Platforms.Clear();
+            foreach (var romPatcherPlatform in platforms)
+            {
+                var wrapper = new RomPatcherPlatformWrapper(romPatcherPlatform);
+                Platforms.Add(wrapper);
+                wrapper.PropertyChanged += RomPatcherPlatformWrapper_PropertyChanged;
+            }
+
+        }
+
+        private void RomPatcherPlatformWrapper_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {            
+            InvalidateCommands();
+        }
+
+        private void InitializeRomPatcher(RomPatcher romPatcher)
+        {
+            RomPatcher = new RomPatcherWrapper(romPatcher);
             RomPatcher.PropertyChanged += RomPatcher_PropertyChanged;
         }
 
         private void LoadPlatformLookup()
-        {            
+        {
             PlatformLookup.Clear();
             PlatformLookup.Add(new NullLookupItem());
             IEnumerable<LookupItem> lookup = _platformLookupProvider.GetLookup();
@@ -96,7 +123,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 _selectedRomPatcherPlatform = value;
                 OnPropertyChanged();
-                ((DelegateCommand)RemovePlatformCommand).RaiseCanExecuteChanged();
+                InvalidateCommands();
             }
         }
 
@@ -107,6 +134,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
             // changes are saved so accept them to reset change tracking
             RomPatcher.AcceptChanges();
+
+            foreach(var plat in Platforms)
+            {
+                plat.AcceptChanges();
+            }
 
             // publish an event to notify that a rom patcher has been saved 
             _eventAggregator.GetEvent<AfterRomPatcherSavedEvent>()
@@ -122,7 +154,15 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
         private bool OnSaveCanExecute()
         {
-            return RomPatcher != null && RomPatcher.IsValid && RomPatcher.IsChanged;
+            return RomPatcher != null
+                && RomPatcher.IsValid 
+                && Platforms.All(p => !p.HasErrors)
+                && 
+                (
+                    RomPatcher.IsChanged
+                    || 
+                    Platforms.Any(p => p.IsChanged)
+                );
         }
 
         private void OnDeleteExecute()
@@ -139,9 +179,36 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        private void OnRemovePlatformExecute()
+        {
+            SelectedRomPatcherPlatform.PropertyChanged -= RomPatcherPlatformWrapper_PropertyChanged;
+            RomPatcher.Model.Platforms.Remove(SelectedRomPatcherPlatform.Model);
+            Platforms.Remove(SelectedRomPatcherPlatform);
+            SelectedRomPatcherPlatform = null;
+            InvalidateCommands();
+        }
+
+        private bool OnRemotePlatformCanExecute()
+        {
+            // enable remove platform button if one is selected
+            return SelectedRomPatcherPlatform != null;
+        }
+
+        private void OnAddPlatformExecute()
+        {
+            var newPlatform = new RomPatcherPlatformWrapper(new RomPatcherPlatform());
+            newPlatform.PropertyChanged += RomPatcherPlatformWrapper_PropertyChanged;
+            Platforms.Add(newPlatform);
+            RomPatcher.Model.Platforms.Add(newPlatform.Model);
+            newPlatform.PlatformId = "";
+        }
+
         private void InvalidateCommands()
         {
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+            ((DelegateCommand)DeleteCommand).RaiseCanExecuteChanged();
+            ((DelegateCommand)AddPlatformCommand).RaiseCanExecuteChanged();
+            ((DelegateCommand)RemovePlatformCommand).RaiseCanExecuteChanged();
         }
 
         private RomPatcher CreateNewRomPatcher()
