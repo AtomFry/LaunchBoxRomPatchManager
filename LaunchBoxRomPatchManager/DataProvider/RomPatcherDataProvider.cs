@@ -1,9 +1,11 @@
 ﻿using LaunchBoxRomPatchManager.DataAccess;
 using LaunchBoxRomPatchManager.Model;
+using System;
 using System.Collections.Generic;
 
 namespace LaunchBoxRomPatchManager.DataProvider
 {
+    [Obsolete]
     public class RomPatcherDataProvider
     {
         public RomPatcherDataProvider()

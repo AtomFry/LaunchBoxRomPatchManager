@@ -1,10 +1,12 @@
 ﻿using LaunchBoxRomPatchManager.ModelWrapper;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Unbroken.LaunchBox.Plugins.Data;
 
 namespace LaunchBoxRomPatchManager.Model
 {
+    [Obsolete]
     public class RomPatcher
     {
         public RomPatcher()

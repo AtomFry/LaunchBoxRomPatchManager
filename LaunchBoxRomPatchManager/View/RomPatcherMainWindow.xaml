@@ -22,8 +22,6 @@
             </MenuItem>
         </Menu>
         <local:RomPatcherNavigationView Grid.Row="1" Grid.Column="0" DataContext="{Binding RomPatcherNavigationViewModel}"/>
-        <local:RomPatcherDetailView Grid.Row="1" 
-                        Grid.Column="1" 
-                        DataContext="{Binding RomPatcherDetailViewModel}"/>
+        <local:PatcherEditView Grid.Row="1" Grid.Column="1" DataContext="{Binding RomPatcherDetailViewModel}"/>
     </Grid>
 </Window>

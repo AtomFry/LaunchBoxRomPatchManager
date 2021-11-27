@@ -6,7 +6,7 @@ namespace LaunchBoxRomPatchManager.View
     public partial class RomPatcherMainWindow : Window
     {
         RomPatcherMainViewModel _romPatcherMainViewModel;
-        
+
         public RomPatcherMainWindow()
         {
             InitializeComponent();
@@ -19,7 +19,7 @@ namespace LaunchBoxRomPatchManager.View
         }
 
         private void RomPatcherMainWindow_Loaded(object sender, RoutedEventArgs e)
-        {            
+        {
             _romPatcherMainViewModel.Load();
         }
     }

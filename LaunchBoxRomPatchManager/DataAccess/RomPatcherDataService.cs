@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace LaunchBoxRomPatchManager.DataAccess
 {
+    [Obsolete]
     public sealed class RomPatcherDataService
     {
         private string StorageFile = DirectoryInfoHelper.Instance.RomPatcherDataFilePath;

@@ -22,8 +22,13 @@ namespace LaunchBoxRomPatchManager.LaunchBoxPlugins
 
         public void OnSelected()
         {
+            PatcherListView patcherListView = new PatcherListView();
+            patcherListView.Show();
+
+            /*
             RomPatcherMainWindow romPatcherMainWindow = new RomPatcherMainWindow();
             romPatcherMainWindow.Show();
+            */
         }
     }
 }
