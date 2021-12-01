@@ -6,13 +6,13 @@ namespace LaunchBoxRomPatchManager.Model
     {
         public Patcher()
         {
-            Platforms = new List<string>();
+            Platforms = new List<PatcherPlatform>();
         }
 
         public string Id { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
         public string CommandLine { get; set; }
-        public List<string> Platforms { get; set; }
+        public List<PatcherPlatform> Platforms { get; set; }
     }
 }

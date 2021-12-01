@@ -97,11 +97,12 @@ namespace LaunchBoxRomPatchManager.DataAccess
         {
             await Task.Run(() =>
             {
-                    // copy the file to backup folder before writing
-                    if (File.Exists(StorageFile))
+                // copy the file to backup folder before writing
+                if (File.Exists(StorageFile))
                 {
                     string currentTimeString = DateTime.Now.ToString("yyyyMMdd_H_mm_ss");
                     string newFilePath = $"{DirectoryInfoHelper.Instance.RomPatcherDataFileBackupPath}\\RomPatchers_{currentTimeString}.json";
+                    DirectoryInfoHelper.CreateDirectoryIfNotExists(newFilePath);
                     File.Copy(StorageFile, newFilePath);
                 }
             });

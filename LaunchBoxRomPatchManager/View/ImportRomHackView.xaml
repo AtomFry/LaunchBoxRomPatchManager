@@ -1,0 +1,156 @@
+﻿<Window x:Class="LaunchBoxRomPatchManager.View.ImportRomHackView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LaunchBoxRomPatchManager.View"
+        mc:Ignorable="d"
+        Title="Import ROM Hack" Height="450" Width="800" Background="Black" WindowState="Maximized">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Content="Creating ROM hack for" Margin="10 10 10 0"/>
+        <TextBox Grid.Row="1" Text="{Binding SelectedGame.Title}" IsEnabled="False" Margin="10 0 10 10"/>
+
+        <Label Grid.Row="2" Content="Patcher" Margin="10 0"/>
+        <TextBox Grid.Row="3" Text="{Binding SelectedPatcher.Name}" IsEnabled="False" Margin="10 0 10 10"/>
+
+        <Label Grid.Row="4" Content="Patch file" Margin="10 0"/>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" VerticalAlignment="Stretch" Margin="10 0 10 10">
+            <TextBox Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" VerticalAlignment="Center" />
+            <Button Content="Browse..." Width="80" Margin="5" VerticalAlignment="Center" Command="{Binding SelectPatchFileCommand}"/>
+        </StackPanel>
+
+        <Label Grid.Row="6" Content="Title" Margin="10 0"/>
+        <TextBox Grid.Row="7" Text="{Binding RomHackTitle, Mode=TwoWay}" Margin="10 0 10 10"/>
+
+        <Label Grid.Row="8" Content="Platform" Margin="10 0"/>
+        <!--
+        <TextBox Grid.Row="9" Text="{Binding RomHackPlatform, Mode=TwoWay}" Margin="10 0 10 10"/>
+        -->
+        <ComboBox Grid.Row="9" ItemsSource="{Binding PlatformLookup}" DisplayMemberPath="PlatformName" SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}" Margin="10 0 10 10"/>
+
+        <Grid Grid.Row="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Images to copy" Margin="10 0" Visibility="{Binding ImagesToCopyVisibility}"/>
+            <DockPanel Grid.Row="1" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding ImagesToCopyVisibility}">
+                <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
+                    <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllImagesCommand}" />
+                    <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoImagesCommand}" />
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding ImagesToCopy}" 
+                      SelectedItem="{Binding SelectedImageToCopy, Mode=TwoWay}"
+                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Copy">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Image type" IsReadOnly="True" Width="*" Binding="{Binding ImageDetails.ImageType}"/>
+                        <DataGridTextColumn Header="Region" IsReadOnly="True" Width="*" Binding="{Binding ImageDetails.Region}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <Label Grid.Row="2" Grid.Column="0" Content="Videos to copy" Margin="10 0" Visibility="{Binding VideosToCopyVisibility}"/>
+            <DockPanel Grid.Row="3" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding VideosToCopyVisibility}">
+                <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
+                    <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllVideosCommand}" />
+                    <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoVideosCommand}" />
+                </StackPanel>
+                <DataGrid   ItemsSource="{Binding VideosToCopy}" 
+                            SelectedItem="{Binding SelectedVideoToCopy, Mode=TwoWay}"
+                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Copy">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Video type" IsReadOnly="True" Width="*" Binding="{Binding VideoType}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <Label Grid.Row="4" Grid.Column="0" Content="Additional apps to copy" Margin="10 0" Visibility="{Binding AdditionalAppsToCopyVisibility}"/>
+            <DockPanel Grid.Row="5" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding AdditionalAppsToCopyVisibility}">
+                <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
+                    <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllAdditionalAppsCommand}" />
+                    <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoAdditionalAppsCommand}" />
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding AdditionalAppsToCopy}" 
+                          SelectedItem="{Binding SelectedAdditionalAppToCopy, Mode=TwoWay}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Copy">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Name" IsReadOnly="True" Width="*" Binding="{Binding AdditionalApplication.Name}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <Image  Grid.Row="0" Grid.RowSpan="6" Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality"
+                    Margin="10 0 10 10" Source="{Binding SelectedImageToCopy.ImageDetails.FilePath}" 
+                   Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+            </Image>
+        </Grid>
+
+        <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Create" Width="75" Margin="5" Command="{Binding CreateRomHackCommand}"/>
+            <Button Content="Cancel" Width="75" Margin="5" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+
+        <!-- Create ROM Hack Log - visibility should display while creating - close automatically if no error - stay open and allow user to close with button click if error -->
+        <Grid Grid.Row="0" Grid.RowSpan="12" Visibility="{Binding CreateRomHackLogVisibility}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Stretch" TextWrapping="NoWrap"
+                       Text="Patching process log" 
+                       Background="Black" Foreground="WhiteSmoke"/>
+            <TextBlock Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="NoWrap"
+                       Text="{Binding CreateRomHackLog}" 
+                       Background="Black" Foreground="WhiteSmoke"/>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Center">
+                <Button Content="Close log" Width="80" Command="{Binding CloseRomHackingLogCommand}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

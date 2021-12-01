@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LaunchBoxRomPatchManager.View"
         mc:Ignorable="d"
-        Title="PatcherEditView" Height="450" Width="800" Background="Black">
+        Title="Edit Patcher" Height="450" Width="800" Background="Black">
     <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -33,6 +33,20 @@
 
         <Label Grid.Row="6" Content="Command line" Margin="10 0"/>
         <TextBox Grid.Row="7" Text="{Binding PatcherCommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
+
+        <DockPanel Grid.Row="8" Margin="10">
+            <StackPanel DockPanel.Dock="Right">
+                <Button Content="Add" Width="125" Margin="5,0,5,5" Command="{Binding AddPlatformCommand}"/>
+                <Button Content="Remove" Width="125" Margin="5,0,5,5" Command="{Binding RemovePlatformCommand}"/>
+            </StackPanel>
+            <DataGrid ItemsSource="{Binding PatcherPlatforms}"
+                      SelectedItem="{Binding SelectedPatcherPlatform, Mode=TwoWay}"
+                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Platforms" Width="*" Binding="{Binding PlatformName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
 
         <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" Margin="5" Command="{Binding SaveCommand}"/>

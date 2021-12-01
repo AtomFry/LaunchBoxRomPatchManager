@@ -5,7 +5,6 @@ using LaunchBoxRomPatchManager.Model;
 using LaunchBoxRomPatchManager.View;
 using Prism.Commands;
 using Prism.Events;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -54,7 +53,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             CloseCommand = new DelegateCommand(OnCloseExecute);
 
             eventAggregator.GetEvent<PatcherSaved>().Subscribe(OnPatcherSavedAsync);
-            eventAggregator.GetEvent<PatcherEditClose>().Subscribe(OnPatcherEditClosed);
+            eventAggregator.GetEvent<PatcherEditClosing>().Subscribe(OnPatcherEditClosed);
         }
 
         private void OnPatcherEditClosed()

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
+﻿using System.Drawing;
 using Unbroken.LaunchBox.Plugins;
 using LaunchBoxRomPatchManager.View;
-using LaunchBoxRomPatchManager.ViewModel;
 
 namespace LaunchBoxRomPatchManager.LaunchBoxPlugins
 {
@@ -24,11 +20,6 @@ namespace LaunchBoxRomPatchManager.LaunchBoxPlugins
         {
             PatcherListView patcherListView = new PatcherListView();
             patcherListView.Show();
-
-            /*
-            RomPatcherMainWindow romPatcherMainWindow = new RomPatcherMainWindow();
-            romPatcherMainWindow.Show();
-            */
         }
     }
 }

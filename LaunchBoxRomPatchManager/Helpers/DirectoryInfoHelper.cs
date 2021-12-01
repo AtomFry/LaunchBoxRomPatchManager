@@ -24,6 +24,19 @@ namespace LaunchBoxRomPatchManager.Helpers
             }
         }
 
+        private string launchboxVideosPath;
+        public string LaunchboxVideosPath
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(launchboxVideosPath))
+                {
+                    launchboxVideosPath = $"{ApplicationPath}\\Videos";
+                }
+                return launchboxVideosPath;
+            }
+        }
+
         // path to launchbox images folder 
         private string launchboxImagesPath;
         public string LaunchboxImagesPath
@@ -34,8 +47,20 @@ namespace LaunchBoxRomPatchManager.Helpers
                 {
                     launchboxImagesPath = $"{ApplicationPath}\\Images";
                 }
-
                 return launchboxImagesPath;
+            }
+        }
+
+        private string launchboxGamesPath;
+        public string LaunchboxGamesPath
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(launchboxGamesPath))
+                {
+                    launchboxGamesPath = $"{ApplicationPath}\\Games";
+                }
+                return launchboxGamesPath;
             }
         }
 
@@ -78,6 +103,19 @@ namespace LaunchBoxRomPatchManager.Helpers
             }
         }
 
+        private string romPatcherDataFolderPath;
+        public string RomPatcherDataFolderPath
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(romPatcherDataFolderPath))
+                {
+                    romPatcherDataFolderPath = $"{PluginFolder}\\Data";
+                }
+                return romPatcherDataFolderPath;
+            }
+        }
+
         private string romPatcherDataFilePath;
         public string RomPatcherDataFilePath
         {
@@ -85,9 +123,22 @@ namespace LaunchBoxRomPatchManager.Helpers
             {
                 if (string.IsNullOrWhiteSpace(romPatcherDataFilePath))
                 {
-                    romPatcherDataFilePath = $"{PluginFolder}\\RomPatchers.json";
+                    romPatcherDataFilePath = $"{RomPatcherDataFolderPath}\\RomPatchers.json";
                 }
                 return romPatcherDataFilePath;
+            }
+        }
+
+        private string pluginTempFolder;
+        public string PluginTempFolder
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(pluginTempFolder))
+                {
+                    pluginTempFolder = $"{PluginFolder}\\Temp";
+                }
+                return pluginTempFolder;
             }
         }
 
@@ -98,40 +149,11 @@ namespace LaunchBoxRomPatchManager.Helpers
             {
                 if (string.IsNullOrWhiteSpace(romPatcherDataFileBackupPath))
                 {
-                    romPatcherDataFileBackupPath = $"{PluginFolder}\\DataBackup";
+                    romPatcherDataFileBackupPath = $"{RomPatcherDataFolderPath}\\DataBackup";
                 }
                 return romPatcherDataFileBackupPath;
             }
         }
-
-        private string platformDataFilePath;
-        public string PlatformDataFilePath
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(platformDataFilePath))
-                {
-                    platformDataFilePath = $"{PluginFolder}\\Platforms.json";
-                }
-                return platformDataFilePath;
-            }
-        }
-
-        private string gameDataFilePath;
-        public string GameDataFilePath
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(gameDataFilePath))
-                {
-                    gameDataFilePath = $"{PluginFolder}\\Games.json";
-                }
-                return gameDataFilePath;
-            }
-        }
-
-
-
 
         private string bigBoxSettingsFile;
         public string BigBoxSettingsFile
@@ -159,10 +181,10 @@ namespace LaunchBoxRomPatchManager.Helpers
             }
         }
 
-
         public static void CreateFolders()
         {
-            CreateFolder(DirectoryInfoHelper.Instance.PluginFolder);
+            CreateFolder(Instance.PluginFolder);
+            CreateFolder(Instance.RomPatcherDataFolderPath);
         }
 
         public static void CreateFolder(string path)
@@ -217,6 +239,37 @@ namespace LaunchBoxRomPatchManager.Helpers
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
+            }
+        }
+
+        public static string GetCleanFileName(string fileName)
+        {
+            char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+
+            string cleanFileName = fileName;
+
+            if (!string.IsNullOrWhiteSpace(cleanFileName))
+            {
+                foreach (char invalidChar in InvalidFileNameChars)
+                {
+                    cleanFileName = cleanFileName.Replace(invalidChar, '_');
+                }
+                return cleanFileName;
+            }
+            return string.Empty;
+        }
+
+        public static void FixDirectoryAttributes(DirectoryInfo directory)
+        {
+            foreach (var subDir in directory.GetDirectories())
+            {
+                FixDirectoryAttributes(subDir);
+            }
+
+            foreach(var file in directory.GetFiles())
+            {
+                file.Attributes = FileAttributes.Normal;
+                file.IsReadOnly = false;
             }
         }
     }
