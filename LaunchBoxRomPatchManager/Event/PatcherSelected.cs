@@ -2,7 +2,8 @@
 
 namespace LaunchBoxRomPatchManager.Event
 {
-    public class AfterRomPatcherDeletedEvent : PubSubEvent<string>
+    public class PatcherSelected : PubSubEvent<string>
     {
+
     }
 }

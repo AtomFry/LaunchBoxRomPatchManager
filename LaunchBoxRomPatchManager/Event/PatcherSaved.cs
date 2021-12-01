@@ -2,7 +2,8 @@
 
 namespace LaunchBoxRomPatchManager.Event
 {
-    public class OpenRomPatcherDetailViewEvent:PubSubEvent<string>
+    public class PatcherSaved : PubSubEvent<string>
     {
+
     }
 }

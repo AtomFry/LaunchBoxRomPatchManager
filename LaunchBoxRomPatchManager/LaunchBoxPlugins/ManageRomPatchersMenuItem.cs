@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
+﻿using System.Drawing;
 using Unbroken.LaunchBox.Plugins;
 using LaunchBoxRomPatchManager.View;
-using LaunchBoxRomPatchManager.ViewModel;
 
 namespace LaunchBoxRomPatchManager.LaunchBoxPlugins
 {
@@ -22,8 +18,8 @@ namespace LaunchBoxRomPatchManager.LaunchBoxPlugins
 
         public void OnSelected()
         {
-            RomPatcherMainWindow romPatcherMainWindow = new RomPatcherMainWindow();
-            romPatcherMainWindow.Show();
+            PatcherListView patcherListView = new PatcherListView();
+            patcherListView.Show();
         }
     }
 }

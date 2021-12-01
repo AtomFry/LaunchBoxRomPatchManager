@@ -1,0 +1,56 @@
+﻿<Window x:Class="LaunchBoxRomPatchManager.View.PatcherEditView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LaunchBoxRomPatchManager.View"
+        mc:Ignorable="d"
+        Title="Edit Patcher" Height="450" Width="800" Background="Black">
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Content="Id" Margin="10 10 10 0"/>
+        <TextBox Grid.Row="1" IsEnabled="False" Text="{Binding PatcherId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
+
+        <Label Grid.Row="2" Content="Name" Margin="10 0"/>
+        <TextBox Grid.Row="3" Text="{Binding PatcherName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
+
+        <Label Grid.Row="4" Content="File path" Margin="10 0"/>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" VerticalAlignment="Stretch" Margin="10 0 10 10">
+            <TextBox Text="{Binding PatcherPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+            <Button Content="Browse..." Width="80" Margin="5" VerticalAlignment="Center" Command="{Binding BrowsePatcherPathCommand}"/>
+        </StackPanel>
+
+        <Label Grid.Row="6" Content="Command line" Margin="10 0"/>
+        <TextBox Grid.Row="7" Text="{Binding PatcherCommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
+
+        <DockPanel Grid.Row="8" Margin="10">
+            <StackPanel DockPanel.Dock="Right">
+                <Button Content="Add" Width="125" Margin="5,0,5,5" Command="{Binding AddPlatformCommand}"/>
+                <Button Content="Remove" Width="125" Margin="5,0,5,5" Command="{Binding RemovePlatformCommand}"/>
+            </StackPanel>
+            <DataGrid ItemsSource="{Binding PatcherPlatforms}"
+                      SelectedItem="{Binding SelectedPatcherPlatform, Mode=TwoWay}"
+                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Platforms" Width="*" Binding="{Binding PlatformName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="OK" Width="75" Margin="5" Command="{Binding SaveCommand}"/>
+            <Button Content="Cancel" Width="75" Margin="5" Command="{Binding CloseCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>
