@@ -5,7 +5,399 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LaunchBoxRomPatchManager.View"
         mc:Ignorable="d"
-        Title="Import ROM Hack" Height="450" Width="800" Background="Black" WindowState="Maximized">
+        Title="Import ROM Hack" 
+        Height="700" Width="1100" WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MouseDoubleClick="Window_MouseDoubleClick" MouseDown="Window_MouseDown">
+
+    <Grid Background="#2A2B34">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="15"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="15,10,15,25"
+              VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Image Grid.Column="0" Margin="0,2,0,0"
+               RenderOptions.BitmapScalingMode="HighQuality" Stretch="Uniform" 
+               HorizontalAlignment="Center" VerticalAlignment="Center"
+               Source="{Binding IconUri}"/>
+
+            <Label Grid.Column="1" Margin="5,0,0,0"
+                   Foreground="#F0F0F0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                   FontStyle="Normal" FontWeight="Bold" Content="Import rom hack" />
+        </Grid>
+
+        <StackPanel Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Button Content="X" FontFamily="Verdana" FontSize="12" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                    Click="Button_Click" BorderThickness="0" Background="#2A2B34" Foreground="#D3D3D5"  Height="30" Width="45" IsTabStop="False" />
+        </StackPanel>
+
+        <Rectangle Grid.Row="1" Grid.Column="1" Fill="#4D4F61" Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        <Rectangle Grid.Row="1" Grid.Column="1" Fill="#3F404E" Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="1"/>
+
+        <ListBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding TabPages}" SelectedItem="{Binding SelectedTabPage, Mode=TwoWay}"
+                 Background="#3F404E" Foreground="#D3D3D5" 
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="1" BorderThickness="0"/>
+
+        <Rectangle Grid.Row="1" Grid.Column="3" Fill="#4D4F61" Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        <Rectangle Grid.Row="1" Grid.Column="3" Fill="#3F404E" Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="1"/>
+
+        <StackPanel Name="RomHackPanel" Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding RomHackVisibility}">
+            <Border Height="35" Background="#2A2B34" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,10">
+                <TextBlock Text="Rom Hack" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+                           Background="#2A2B34" Foreground="#D3D3D5" />
+            </Border>
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="Patching" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.Title}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Patcher" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatcher.Name}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Patch" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Button Grid.Row="2" Grid.Column="5"  Content="..." HorizontalAlignment="Right" VerticalAlignment="Stretch" Command="{Binding SelectPatchFileCommand}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                
+                <Label Grid.Row="3" Grid.Column="0" Content="Title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="Sort title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackSortTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="5" Grid.Column="0" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="5" Grid.Column="1" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding PlatformLookup}" 
+                          DisplayMemberPath="PlatformName" 
+                          SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}"/>
+            </Grid>
+        </StackPanel>
+
+
+        <StackPanel Name="MetadataPanel" Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding MetadataVisibility}">
+            <Border Height="35" Background="#2A2B34" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,10">
+                <TextBlock HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" Background="#2A2B34" Foreground="#D3D3D5" Text="Metadata" />
+            </Border>
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="Title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Sort title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackSortTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Release Date" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding RomHackReleaseDate, Mode=TwoWay, StringFormat=MM-dd-yyyy}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="2" Grid.Column="2" Content="Rating" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="3"
+                         Text="{Binding RomHackRating, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="Release Type" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding RomHackReleaseType, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="3" Grid.Column="2" Content="Max Players" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="3"
+                         Text="{Binding RomHackMaxPlayers, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="Genres" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding RomHackGenreString, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="4" Grid.Column="2" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="4" Grid.Column="3" Grid.ColumnSpan="3" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding PlatformLookup}" 
+                          DisplayMemberPath="PlatformName" 
+                          SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}" />
+
+                <Label Grid.Row="5" Grid.Column="0" Content="Developers" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding RomHackDeveloper, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="5" Grid.Column="2" Content="Publishers" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="5" Grid.Column="3" Grid.ColumnSpan="3"
+                         Text="{Binding RomHackPublisher, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="6" Grid.Column="0" Content="Series" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding RomHackSeries, Mode=TwoWay}"  Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="6" Grid.Column="2" Content="Region" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="6" Grid.Column="3" Grid.ColumnSpan="3"
+                         Text="{Binding RomHackRegion, Mode=TwoWay}"  Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="7" Grid.Column="0" Content="Play Modes" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding RomHackPlayMode, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="7" Grid.Column="2" Content="Version" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="7" Grid.Column="3" Grid.ColumnSpan="3"
+                         Text="{Binding RomHackVersion, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="8" Grid.Column="0" Content="Status" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding RomHackStatus, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="8" Grid.Column="2" Content="Date Added" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="8" Grid.Column="3" Text="{Binding RomHackDateAdded, StringFormat=MM-dd-yyyy}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <CheckBox Grid.Row="8" Grid.Column="4" IsChecked="{Binding RomHackFavorite, Mode=TwoWay}" Content="Favorite" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <CheckBox Grid.Row="8" Grid.Column="5" IsChecked="{Binding RomHackPortable, Mode=TwoWay}" Content="Portable" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="9" Grid.Column="0" Content="Source" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding RomHackSource, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="9" Grid.Column="2" Content="Date Modified" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="9" Grid.Column="3" Text="{Binding RomHackDateAdded, StringFormat=MM-dd-yyyy}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <CheckBox Grid.Row="9" Grid.Column="4" IsChecked="{Binding RomHackComplete, Mode=TwoWay}" Content="Completed" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <CheckBox Grid.Row="9" Grid.Column="5" IsChecked="{Binding RomHackHide, Mode=TwoWay}" Content="Hide" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="10" Grid.Column="0" Content="Last Played" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding RomHackLastPlayedDate, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="10" Grid.Column="2" Content="Play Count" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="10" Grid.Column="3" Text="{Binding RomHackPlayCount, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <CheckBox Grid.Row="10" Grid.Column="4" IsChecked="{Binding RomHackBroken, Mode=TwoWay}" Content="Broken" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <CheckBox Grid.Row="10" Grid.Column="5" IsChecked="{Binding RomHackInstalled, Mode=TwoWay}" Content="Installed" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="11" Grid.Column="0" Content="Video URL" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackVideoUrl, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5" />
+
+                <Label Grid.Row="12" Grid.Column="0" Content="Wikipedia URL" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackWikipediaUrl, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5" />
+
+                <Label Grid.Row="13" Grid.Column="0" Content="Star Rating" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="13" Grid.Column="1" Text="{Binding RomHackStarRating, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5" />
+            </Grid>
+        </StackPanel>
+
+        <Grid Name="NotesGrid" Grid.Row="1" Grid.Column="3"  Visibility="{Binding NotesVisibility}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Height="35" Background="#2A2B34" 
+                    HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5,5,5,10">
+                <TextBlock Text="Notes" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+                        Background="#2A2B34" Foreground="#D3D3D5" />
+            </Border>
+            <TextBox Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,5"
+                       TextWrapping="Wrap" TextAlignment="Left" VerticalContentAlignment="Top" HorizontalContentAlignment="Left"
+                       Text="{Binding RomHackNotes, Mode=TwoWay}" 
+                       Background="#343542" Foreground="#D3D3D5"/>
+        </Grid>
+
+        <StackPanel Name="AdditionalAppsPanel" Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding AdditionalAppsVisibility}">
+            <Border Height="35" Background="#2A2B34" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,10">
+                <TextBlock Text="Additional Apps" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+                           Background="#2A2B34" Foreground="#D3D3D5" />
+            </Border>
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <DockPanel Margin="10 2">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
+                        <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllAdditionalAppsCommand}" />
+                        <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoAdditionalAppsCommand}" />
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding AdditionalAppsToCopy}" 
+                          SelectedItem="{Binding SelectedAdditionalAppToCopy, Mode=TwoWay}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Copy">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Name" IsReadOnly="True" Width="*" Binding="{Binding AdditionalApplication.Name}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Grid>
+        </StackPanel>
+
+        <Grid Name="ImagesGrid" Grid.Row="1" Grid.Column="3"  Visibility="{Binding ImagesVisibility}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Grid.Column="0" Margin="5,5,5,10" Grid.ColumnSpan="2" Height="35" Background="#2A2B34"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <TextBlock Text="Images" Background="#2A2B34" Foreground="#D3D3D5" 
+                           HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="5,0,5,5" 
+                        HorizontalAlignment="Right" VerticalAlignment="Stretch" Orientation="Horizontal">
+                <Button Content="All" Width="80" Height="30" Margin="5,0,0,0" Command="{Binding SelectAllImagesCommand}" />
+                <Button Content="None" Width="80" Height="30" Margin="5,0,0,0" Command="{Binding SelectNoImagesCommand}" />
+            </StackPanel>
+
+            <DataGrid Grid.Row="2" Grid.Column="0" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        ItemsSource="{Binding ImagesToCopy}" SelectedItem="{Binding SelectedImageToCopy, Mode=TwoWay}"
+                        AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Copy">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Image type" IsReadOnly="True" Width="*" Binding="{Binding ImageDetails.ImageType}"/>
+                    <DataGridTextColumn Header="Region" IsReadOnly="True" Width="*" Binding="{Binding ImageDetails.Region}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Image Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,0"
+                    RenderOptions.BitmapScalingMode="HighQuality" Stretch="Uniform" Source="{Binding SelectedImageToCopy.ImageDetails.FilePath}">
+            </Image>
+        </Grid>
+
+        <Grid Name="VideosGrid" Grid.Row="1" Grid.Column="3"  Visibility="{Binding VideosVisibility}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="35" Background="#2A2B34" 
+                    HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5,5,5,10">
+                <TextBlock Text="Videos" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+                        Background="#2A2B34" Foreground="#D3D3D5" />
+            </Border>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="5,0,5,5" 
+                        HorizontalAlignment="Right" VerticalAlignment="Stretch" Orientation="Horizontal">
+                <Button Content="All" Width="80" Height="30" Margin="5,0,0,0" Command="{Binding SelectAllVideosCommand}" />
+                <Button Content="None" Width="80" Height="30" Margin="5,0,0,0" Command="{Binding SelectNoVideosCommand}" />
+            </StackPanel>
+
+            <DataGrid   Grid.Row="2" Grid.Column="0" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                        ItemsSource="{Binding VideosToCopy}" SelectedItem="{Binding SelectedVideoToCopy, Mode=TwoWay}"
+                        AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Copy">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Video type" IsReadOnly="True" Width="*" Binding="{Binding VideoType}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <MediaElement Name="Video_SelectedGame"
+                          IsHitTestVisible="False"
+                          Source="{Binding SelectedVideoToCopy.VideoPath}"
+                          Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,0"
+                          Stretch="Uniform" LoadedBehavior="Play"/>
+        </Grid>
+
+        <Grid Name="LogGrid" Margin="10,2" Grid.Row="1" Grid.Column="3"  Visibility="{Binding LogVisibility}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="35" Background="#2A2B34" 
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,10">
+                <TextBlock Text="Creation Log" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+                        Background="#2A2B34" Foreground="#D3D3D5" />
+            </Border>
+            <TextBlock Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,5"
+                       TextWrapping="Wrap" TextAlignment="Left"
+                       Text="{Binding CreateRomHackLog}" 
+                       Background="#343542" Foreground="#D3D3D5"/>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Button Content="OK" Width="80" Height="30" Command="{Binding CreateRomHackCommand}"
+                    Background="#3F404E" Foreground="#D3D3D5" Margin="0,0,10,0" />
+            <Button Content="Cancel" Click="Button_Click" Width="80" Height="30" Background="#3F404E" Foreground="#D3D3D5" Margin="0,0,10,0"/>
+        </StackPanel>
+    </Grid>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -22,27 +414,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Content="Creating ROM hack for" Margin="10 10 10 0"/>
-        <TextBox Grid.Row="1" Text="{Binding SelectedGame.Title}" IsEnabled="False" Margin="10 0 10 10"/>
-
-        <Label Grid.Row="2" Content="Patcher" Margin="10 0"/>
-        <TextBox Grid.Row="3" Text="{Binding SelectedPatcher.Name}" IsEnabled="False" Margin="10 0 10 10"/>
-
-        <Label Grid.Row="4" Content="Patch file" Margin="10 0"/>
-        <StackPanel Grid.Row="5" Orientation="Horizontal" VerticalAlignment="Stretch" Margin="10 0 10 10">
-            <TextBox Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" VerticalAlignment="Center" />
-            <Button Content="Browse..." Width="80" Margin="5" VerticalAlignment="Center" Command="{Binding SelectPatchFileCommand}"/>
-        </StackPanel>
-
-        <Label Grid.Row="6" Content="Title" Margin="10 0"/>
-        <TextBox Grid.Row="7" Text="{Binding RomHackTitle, Mode=TwoWay}" Margin="10 0 10 10"/>
-
-        <Label Grid.Row="8" Content="Platform" Margin="10 0"/>
-        <!--
-        <TextBox Grid.Row="9" Text="{Binding RomHackPlatform, Mode=TwoWay}" Margin="10 0 10 10"/>
-        -->
-        <ComboBox Grid.Row="9" ItemsSource="{Binding PlatformLookup}" DisplayMemberPath="PlatformName" SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}" Margin="10 0 10 10"/>
-
         <Grid Grid.Row="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -57,30 +428,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="Images to copy" Margin="10 0" Visibility="{Binding ImagesToCopyVisibility}"/>
-            <DockPanel Grid.Row="1" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding ImagesToCopyVisibility}">
-                <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
-                    <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllImagesCommand}" />
-                    <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoImagesCommand}" />
-                </StackPanel>
-                <DataGrid ItemsSource="{Binding ImagesToCopy}" 
-                      SelectedItem="{Binding SelectedImageToCopy, Mode=TwoWay}"
-                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Copy">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Image type" IsReadOnly="True" Width="*" Binding="{Binding ImageDetails.ImageType}"/>
-                        <DataGridTextColumn Header="Region" IsReadOnly="True" Width="*" Binding="{Binding ImageDetails.Region}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
 
-            <Label Grid.Row="2" Grid.Column="0" Content="Videos to copy" Margin="10 0" Visibility="{Binding VideosToCopyVisibility}"/>
             <DockPanel Grid.Row="3" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding VideosToCopyVisibility}">
                 <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
                     <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllVideosCommand}" />
@@ -135,7 +483,6 @@
             <Button Content="Cancel" Width="75" Margin="5" Command="{Binding CancelCommand}"/>
         </StackPanel>
 
-        <!-- Create ROM Hack Log - visibility should display while creating - close automatically if no error - stay open and allow user to close with button click if error -->
         <Grid Grid.Row="0" Grid.RowSpan="12" Visibility="{Binding CreateRomHackLogVisibility}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -153,4 +500,8 @@
             </StackPanel>
         </Grid>
     </Grid>
+    -->
+    
+    
+    
 </Window>

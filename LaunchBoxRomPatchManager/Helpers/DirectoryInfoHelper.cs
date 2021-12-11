@@ -24,6 +24,19 @@ namespace LaunchBoxRomPatchManager.Helpers
             }
         }
 
+        private string sevenZipPath;
+        public string SevenZipPath
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(sevenZipPath))
+                {
+                    sevenZipPath = $"{ApplicationPath}\\ThirdParty\\7-Zip\\7z.exe";
+                }
+                return sevenZipPath;
+            }
+        }
+
         private string launchboxVideosPath;
         public string LaunchboxVideosPath
         {
@@ -199,7 +212,7 @@ namespace LaunchBoxRomPatchManager.Helpers
         {
             get
             {
-                return "pack://application:,,,/LaunchBoxRomPatchManager;component/resources";
+                return "pack://application:,,,/LaunchBoxRomPatchManager;component/EmbeddedResources";
             }
         }
 

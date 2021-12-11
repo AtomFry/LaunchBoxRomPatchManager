@@ -34,6 +34,15 @@ namespace LaunchBoxRomPatchManager.View
             importRomHackViewModel = _importRomHackViewModel;
             DataContext = importRomHackViewModel;
             Loaded += ImportRomHackView_Loaded;
+            PreviewKeyDown += ImportRomHackView_PreviewKeyDown;
+        }
+
+        private void ImportRomHackView_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
 
         private void OnCancel()
@@ -44,6 +53,22 @@ namespace LaunchBoxRomPatchManager.View
         private void ImportRomHackView_Loaded(object sender, RoutedEventArgs e)
         {
             importRomHackViewModel.LoadAsync();
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
         }
     }
 }
