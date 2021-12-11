@@ -7,10 +7,12 @@
 
   <ItemGroup>
     <None Remove="EmbeddedResources\RomHackingIcon.jpg" />
+    <None Remove="EmbeddedResources\RomHackingIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="EmbeddedResources\RomHackingIcon.jpg" />
+    <Resource Include="EmbeddedResources\RomHackingIcon.jpg" />
+    <Resource Include="EmbeddedResources\RomHackingIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
