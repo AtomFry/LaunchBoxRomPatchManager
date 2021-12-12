@@ -129,7 +129,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
             InitializeRomHackProperties();
         }
 
-
         private void InitializeTabPages()
         {
             SelectedTabPage = "Rom Hack";
@@ -146,7 +145,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
             TabPages.Add("Log");
         }
 
-        // derive the SelectedPatcher from the SelectedGame's platform 
         private async Task InitializePatcherAsync()
         {
             // get all patchers from the data file
@@ -275,6 +273,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
             // rom hack title cannot be blank
             if (string.IsNullOrWhiteSpace(RomHackTitle)) return false;
  
+            // todo: need to disable when rom hack creation is in progress
+
             return true;
         }
 
@@ -1149,6 +1149,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 selectedPatcher = value;
                 OnPropertyChanged("SelectedPatcher");
+                
+                // raise the event that determines if the create button is enabled
+                InvalidateCommands();
             }
         }
 
@@ -1159,6 +1162,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 selectedPatchFilePath = value;
                 OnPropertyChanged("SelectedPatchFilePath");
+
+                // raise the event that determines if the create button is enabled
+                InvalidateCommands();
             }
         }
 
@@ -1169,6 +1175,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 romHackTitle = value;
                 OnPropertyChanged("RomHackTitle");
+
+                // raise the event that determines if the create button is enabled
+                InvalidateCommands();
             }
         }
 
@@ -1661,5 +1670,12 @@ namespace LaunchBoxRomPatchManager.ViewModel
         }
 
         public Uri IconUri { get; } = ResourceImages.RomHackingIconPath;
+
+        private void InvalidateCommands()
+        {
+            // call this whenever a property changes that impacts whether a command should be able to execute
+            ((DelegateCommand)CreateRomHackCommand).RaiseCanExecuteChanged();
+        }
+
     }
 }
