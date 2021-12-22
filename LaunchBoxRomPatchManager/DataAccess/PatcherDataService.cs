@@ -43,7 +43,7 @@ namespace LaunchBoxRomPatchManager.DataAccess
         private async Task UpdatePatcherAsync(Patcher patcher)
         {
             List<Patcher> patchers = await ReadFromFileAsync();
-            Patcher existing = patchers.Single(f => f.Id == patcher.Id);
+            Patcher existing = patchers.SingleOrDefault(f => f.Id == patcher.Id);
             int indexOfExisting = patchers.IndexOf(existing);
             patchers.Insert(indexOfExisting, patcher);
             patchers.Remove(existing);
@@ -76,18 +76,28 @@ namespace LaunchBoxRomPatchManager.DataAccess
 
         private async Task<List<Patcher>> ReadFromFileAsync()
         {
+            // make sure the data file exists 
+            if (!File.Exists(StorageFile))
+            {
+                // make sure the folders exist 
+                DirectoryInfoHelper.CreateFolders();
+
+                // create a sample list 
+                List<Patcher> patchers = new List<Patcher>
+                {
+                    new Patcher{Id=Guid.NewGuid().ToString(), Name="FLIPS", Path="", CommandLine="{patch} {rom}"},
+                    new Patcher{Id=Guid.NewGuid().ToString(), Name="PPF-PDX", Path="", CommandLine="{rom} {patch}"}
+                };
+
+                // save the file 
+                await SaveToFileAsync(patchers);
+
+                return patchers;
+            }
+
+            // read and deserialize the file
             return await Task.Run(() =>
             {
-
-                if (!File.Exists(StorageFile))
-                {
-                    return new List<Patcher>
-                {
-                        new Patcher{Id=Guid.NewGuid().ToString(), Name="FLIPS", Path="", CommandLine=""},
-                        new Patcher{Id=Guid.NewGuid().ToString(), Name="PPF-PDX", Path="", CommandLine=""}
-                };
-                }
-
                 string json = File.ReadAllText(StorageFile);
                 return JsonConvert.DeserializeObject<List<Patcher>>(json);
             });
@@ -125,7 +135,6 @@ namespace LaunchBoxRomPatchManager.DataAccess
 
         private PatcherDataService()
         {
-
         }
         #endregion
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace LaunchBoxRomPatchManager.Helpers
@@ -37,6 +38,28 @@ namespace LaunchBoxRomPatchManager.Helpers
             SevenZipHelper sevenZipHelper = new SevenZipHelper();
             sevenZipHelper.TryExtract(archiveFile, destination);
             return sevenZipHelper;
+        }
+
+        public static bool IsArchiveFile(string fileName)
+        {
+            bool isArchiveFile = false;
+
+            string extension = Path.GetExtension(fileName);
+            extension = extension.ToLower();
+
+            switch(extension)
+            {
+                case ".7z":
+                case ".zip":
+                case ".rar":
+                    isArchiveFile = true;
+                    break;
+
+                default:
+                    break;
+            }
+
+            return isArchiveFile;
         }
     }
 }

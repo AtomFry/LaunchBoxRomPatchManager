@@ -39,8 +39,10 @@ namespace LaunchBoxRomPatchManager.ViewModel
         public ObservableCollection<ImageToCopy> ImagesToCopy { get; }
         public ObservableCollection<VideoToCopy> VideosToCopy { get; }
         public ObservableCollection<AdditionalAppToCopy> AdditionalAppsToCopy { get; }
-        public ObservableCollection<PatcherPlatform> PlatformLookup { get; }
+        public ObservableCollection<IPlatform> PlatformLookup { get; }
         public ObservableCollection<string> TabPages { get; }
+        public ObservableCollection<SourceFile> SourceRomFiles { get; }
+        public ObservableCollection<SourceFile> SourcePatchFiles { get; }
 
         private IGame selectedGame;
         private ImageToCopy selectedImageToCopy;
@@ -49,9 +51,17 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private string selectedTabPage;
         private Patcher selectedPatcher;
         private string selectedPatchFilePath;
+        private string workingDirectory;
+        private bool sourceFileWasZipped;
+        private bool sourceFileWasCue;
+        private string sourceCueFile;
+        private string romFolderInWorkingDirectory;
+        private SourceFile selectedSourceRomFile;
+        private SourceFile selectedSourcePatchFile;
 
-        private PatcherPlatform romHackPlatform;
+        private IPlatform romHackPlatform;
         private string romHackTitle;
+        private string cleanRomHackTitle;
         private string romHackSortTitle;
         private DateTime? romHackReleaseDate;
         private string romHackRating;
@@ -101,7 +111,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
             ImagesToCopy = new ObservableCollection<ImageToCopy>();
             VideosToCopy = new ObservableCollection<VideoToCopy>();
             AdditionalAppsToCopy = new ObservableCollection<AdditionalAppToCopy>();
-            PlatformLookup = new ObservableCollection<PatcherPlatform>();
+            PlatformLookup = new ObservableCollection<IPlatform>();
+            SourceRomFiles = new ObservableCollection<SourceFile>();
+            SourcePatchFiles = new ObservableCollection<SourceFile>();
 
             SelectPatchFileCommand = new DelegateCommand(OnSelectPatchFileExecute);
             SelectAllImagesCommand = new DelegateCommand(OnSelectAllImagesExecute);
@@ -116,6 +128,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
         public async void LoadAsync()
         {
+            // creates a temp folder to work out of
+            InitializeWorkingDirectory();
+
             // create the available tabs
             InitializeTabPages();
 
@@ -125,8 +140,32 @@ namespace LaunchBoxRomPatchManager.ViewModel
             // populate the platform lookup
             InitializePlatformLookup();
 
+            // initialize source rom files from selected game's application path 
+            InitializeSourceRomFiles();
+
             // initialize rom hack properties from selected game
             InitializeRomHackProperties();
+        }
+
+        private void InitializeWorkingDirectory()
+        {
+            // make sure plugin folder exists 
+            string pluginFolder = DirectoryInfoHelper.Instance.PluginFolder;
+            DirectoryInfoHelper.CreateDirectoryIfNotExists(pluginFolder);
+
+            // make sure temp folder exists 
+            string pluginTempFolder = DirectoryInfoHelper.Instance.PluginTempFolder;
+            DirectoryInfoHelper.CreateDirectoryIfNotExists(pluginTempFolder);
+
+            // create a new unique folder to work out of in the temp directory
+            string tempDirGuid = Guid.NewGuid().ToString();
+            string tempDir = Path.Combine(pluginTempFolder, tempDirGuid);
+            if (!Directory.Exists(tempDir))
+            {
+                Directory.CreateDirectory(tempDir);
+            }
+
+            workingDirectory = tempDir;
         }
 
         private void InitializeTabPages()
@@ -152,11 +191,17 @@ namespace LaunchBoxRomPatchManager.ViewModel
             IEnumerable<Patcher> patchers = await patcherDataProvider.GetAllPatchersAsync();
 
             // find the patcher that has this platform assigned
-            PatcherPlatform patcherPlatform = new PatcherPlatform() { PlatformName = SelectedGame.Platform };
-            PatcherPlatformComparer patcherPlatformComparer = new PatcherPlatformComparer();
-            Patcher patcher = patchers.SingleOrDefault(p => p.Platforms.Contains(patcherPlatform, patcherPlatformComparer));
-
-            SelectedPatcher = patcher;
+            foreach (Patcher patcher in patchers)
+            {
+                foreach (string platform in patcher.Platforms)
+                {
+                    if (platform == SelectedGame.Platform)
+                    {
+                        SelectedPatcher = patcher;
+                        break;
+                    }
+                }
+            }
         }
 
         private void InitializePlatformLookup()
@@ -164,7 +209,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             IPlatform[] platforms = PluginHelper.DataManager.GetAllPlatforms().OrderBy(p => p.Name).ToArray();
             foreach (IPlatform platform in platforms)
             {
-                PlatformLookup.Add(new PatcherPlatform() { PlatformName = platform.Name });
+                PlatformLookup.Add(platform);
             }
         }
 
@@ -172,7 +217,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         {
             RomHackTitle = SelectedGame.Title;
             RomHackSortTitle = SelectedGame.SortTitle;
-            RomHackPlatform = PlatformLookup.FirstOrDefault(p => p.PlatformName == SelectedGame.Platform);
+            RomHackPlatform = PlatformLookup.FirstOrDefault(p => p.Name == SelectedGame.Platform);
             RomHackReleaseDate = SelectedGame.ReleaseDate;
             RomHackRating = SelectedGame.Rating;
             RomHackReleaseType = SelectedGame.ReleaseType;
@@ -248,6 +293,68 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        private void InitializeSourceRomFiles()
+        {
+            // get the source rom files depending on the source file's extension 
+            string sourceRomExtension = Path.GetExtension(SelectedGame.ApplicationPath);
+            sourceRomExtension = sourceRomExtension.ToLower();
+
+            // create a folder in the working directory for the source rom file(s)
+            romFolderInWorkingDirectory = Path.Combine(workingDirectory, "ROM");
+            if (!Directory.Exists(romFolderInWorkingDirectory))
+            {
+                Directory.CreateDirectory(romFolderInWorkingDirectory);
+            }
+
+            sourceFileWasZipped = false;
+            switch (sourceRomExtension)
+            {
+                case ".7z":
+                case ".rar":
+                case ".zip":
+                    sourceFileWasZipped = true;
+
+                    // extract archive to populate source rom collection
+                    SevenZipHelper.Extract(SelectedGame.ApplicationPath, romFolderInWorkingDirectory);
+                    break;
+
+                case ".cue":
+                    sourceFileWasCue = true;
+
+                    // read cue sheet to populate source rom collection with cue file and bin files
+                    List<string> cueFiles = CueSheetReader.ReadCueSheet(SelectedGame.ApplicationPath);
+                    foreach (string cueFile in cueFiles)
+                    {
+                        string cueFileDestination = Path.Combine(romFolderInWorkingDirectory, Path.GetFileName(cueFile));
+                        File.Copy(cueFile, cueFileDestination);
+
+                        if(cueFileDestination.ToLower().EndsWith(".cue"))
+                        {
+                            sourceCueFile = cueFileDestination;
+                        }
+                    }
+                    break;
+
+                default:
+                    string destinationFile = Path.Combine(romFolderInWorkingDirectory, Path.GetFileName(SelectedGame.ApplicationPath));
+                    File.Copy(SelectedGame.ApplicationPath, destinationFile);
+                    break;
+            }
+
+            // add files to the SourceRomFiles collection and default a selected rom file
+            IEnumerable<string> filesInDirectory = Directory.EnumerateFiles(romFolderInWorkingDirectory);
+            foreach (string file in filesInDirectory)
+            {
+                SourceFile sourceFile = new SourceFile(file);
+                SourceRomFiles.Add(sourceFile);
+
+                if (SelectedSourceRomFile == null && DirectoryInfoHelper.IsRomFIle(file))
+                {
+                    SelectedSourceRomFile = sourceFile;
+                }
+            }
+        }
+
         private void OnCancelExecute()
         {
             // publishes an event that the window subscribes to so it can close the window
@@ -272,7 +379,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
             // rom hack title cannot be blank
             if (string.IsNullOrWhiteSpace(RomHackTitle)) return false;
- 
+
             // todo: need to disable when rom hack creation is in progress
 
             return true;
@@ -321,7 +428,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
                     newGame.ReleaseType = RomHackReleaseType;
                     newGame.MaxPlayers = RomHackMaxPlayers;
                     newGame.GenresString = RomHackGenreString;
-                    newGame.Platform = RomHackPlatform.PlatformName;
+                    newGame.Platform = RomHackPlatform.Name;
                     newGame.Developer = RomHackDeveloper;
                     newGame.Series = RomHackSeries;
                     newGame.Region = RomHackRegion;
@@ -389,7 +496,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 string videoFolder = string.Empty;
 
                 IPlatform[] platforms = PluginHelper.DataManager.GetAllPlatforms();
-                IPlatform platform = platforms.FirstOrDefault(p => p.Name == RomHackPlatform.PlatformName);
+                IPlatform platform = RomHackPlatform;
                 if (platform != null)
                 {
                     IPlatformFolder[] platformFolders = platform.GetAllPlatformFolders();
@@ -480,8 +587,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
                         DirectoryInfoHelper.CreateDirectoryIfNotExists(videoPath);
 
                         AddRomHackLogMessage($"Destination video path: {videoPath}");
-
-                        LogHelper.Log($"Video to copy: {videoToCopy.VideoType}, {videoToCopy.VideoPath}, {videoPath}");
 
                         if (!File.Exists(videoPath))
                         {
@@ -601,196 +706,14 @@ namespace LaunchBoxRomPatchManager.ViewModel
             return returnValue;
         }
 
-        private string CopyOriginalRomToTemp(string tempDirectory)
-        {
-            // make a copy of the source rom in a temp directory 
-            string originalRomFileName = Path.GetFileName(SelectedGame.ApplicationPath);
-            string romFullPathInTempDirectory = Path.Combine(tempDirectory, originalRomFileName);
-            File.Copy(SelectedGame.ApplicationPath, romFullPathInTempDirectory, true);
-
-            return romFullPathInTempDirectory;
-        }
-
         private string CreateRomHack()
         {
-            // since rom hack title is used in folder and file names, get a clean version without illegal characters
-            string cleanRomHackTitle;
-            try
-            {
-                AddRomHackLogMessage($"Cleaning rom hack title: {RomHackTitle}");
-
-                cleanRomHackTitle = DirectoryInfoHelper.GetCleanFileName(RomHackTitle);
-
-                AddRomHackLogMessage($"Cleaned rom hack title: {cleanRomHackTitle}");
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while cleaning the rom hack title: {ex.Message}");
-                LogHelper.LogException(ex, $"Cleaning rom hack title for {RomHackTitle}");
-                return string.Empty;
-            }
-
-            // create temp dir in ..\plugins\this plugin\temp\guid
-            string tempDirectory;
-            try
-            {
-                AddRomHackLogMessage($"Creating temporary directory");
-                tempDirectory = CreateTempDirectory();
-                AddRomHackLogMessage($"Temporary directory created: {tempDirectory}");
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while creating the temporary directory: {ex.Message}");
-                LogHelper.LogException(ex, $"Creating temporary directory for {RomHackTitle}");
-                return string.Empty;
-            }
-
-            // make a copy of the source rom in a temp directory 
-            string romFullPathInTempDirectory;
-            try
-            {
-                AddRomHackLogMessage($"Copying source rom file to {tempDirectory}");
-                romFullPathInTempDirectory = CopyOriginalRomToTemp(tempDirectory);
-                AddRomHackLogMessage($"Copied source rom to temporary directory: {romFullPathInTempDirectory}");
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while copying the source rom to the temporary directory: {ex.Message}");
-                LogHelper.LogException(ex, $"Copying source rom to temporary directory for {RomHackTitle}");
-                return string.Empty;
-            }
-
-            // check if the source rom is zipped 
-            bool isZipped = false;
-            try
-            {
-                AddRomHackLogMessage($"Checking if source rom is a zip file: {romFullPathInTempDirectory}");
-                if (string.Compare(Path.GetExtension(romFullPathInTempDirectory), ".zip", true) == 0)
-                {
-                    isZipped = true;
-                }
-                string tempMessage = isZipped ? "Source rom is a zip file" : "Source rom is not a zip file";
-                AddRomHackLogMessage($"{tempMessage}");
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while checking whether the source rom is a zip file: {ex.Message}");
-                LogHelper.LogException(ex, $"Checking for zip extension on {romFullPathInTempDirectory}");
-                return string.Empty;
-            }
-
-            // create a temporary directory  for zip file if necessary 
-            string tempZipDirectory = string.Empty;
-            if (isZipped)
-            {
-                try
-                {
-                    tempZipDirectory = Path.Combine(tempDirectory, cleanRomHackTitle);
-
-                    AddRomHackLogMessage($"Creating directory to unzip source rom: {tempZipDirectory}");
-
-                    if (!Directory.Exists(tempZipDirectory))
-                    {
-                        Directory.CreateDirectory(tempZipDirectory);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    AddRomHackLogMessage($"An unexpected error occurred while creating a directory to unzip the source rom file: {ex.Message}");
-                    LogHelper.LogException(ex, $"Attempting to create directory to unzip source rom: {tempZipDirectory}");
-                    return string.Empty;
-                }
-            }
-
-            // unzip source rom if it's a zip
-            if (isZipped)
-            {
-                try
-                {
-                    AddRomHackLogMessage($"Unzipping {romFullPathInTempDirectory} to {tempZipDirectory}");
-                    ZipFile.ExtractToDirectory(romFullPathInTempDirectory, tempZipDirectory);
-                }
-                catch (Exception ex)
-                {
-                    AddRomHackLogMessage($"An unexpected error occurred while trying to unzip {romFullPathInTempDirectory} to {tempZipDirectory}: {ex.Message}");
-                    LogHelper.LogException(ex, $"Attempting to extract {romFullPathInTempDirectory} to {tempZipDirectory}");
-                    return string.Empty;
-                }
-            }
-
-            // get a handle on the extracted ROM file 
-            if (isZipped)
-            {
-                AddRomHackLogMessage($"Getting a handle on the extracted ROM file in {tempZipDirectory}");
-                try
-                {
-                    bool unzippedRomFileFound = false;
-
-                    IEnumerable<string> filesInDirectory = Directory.EnumerateFiles(tempZipDirectory);
-                    foreach (string file in filesInDirectory)
-                    {
-                        // take the first file that is not a zip
-                        // todo: will run into trouble here if patching a game zip that has multiple files
-                        if (string.Compare(Path.GetExtension(file), ".zip", true) != 0)
-                        {
-                            romFullPathInTempDirectory = file;
-                            unzippedRomFileFound = true;
-                            break;
-                        }
-                    }
-
-                    if (!unzippedRomFileFound)
-                    {
-                        throw new Exception($"No file was found in {tempZipDirectory}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    AddRomHackLogMessage($"An unexpected error occurred while trying to get a handle on the extracted rom file: {ex.Message}");
-                    LogHelper.LogException(ex, $"Attempting to get a handle on the extracted rom file in {tempZipDirectory}");
-                    return string.Empty;
-                }
-            }
-
-            // rename source rom to the patch name 
-            string romCopyExtension = Path.GetExtension(romFullPathInTempDirectory);
-            string romCopyPath = Path.GetDirectoryName(romFullPathInTempDirectory);
-            string romCopyNewName = Path.Combine(romCopyPath, $"{cleanRomHackTitle}{romCopyExtension}");
-            try
-            {
-                AddRomHackLogMessage($"Renaming {romFullPathInTempDirectory} to {romCopyNewName}");
-
-                // rename the rom to the patch name
-                File.Move(romFullPathInTempDirectory, romCopyNewName);
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to rename {romFullPathInTempDirectory} to {romCopyNewName}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to rename the source rom from {romFullPathInTempDirectory} to {romCopyNewName}");
-                return string.Empty;
-            }
-
-            // copy the Rom Patch into the temp directory
-            string romPatchCopyFileName = Path.GetFileName(SelectedPatchFilePath);
-            string romPatchCopyDestinationFullPath = Path.Combine(tempDirectory, romPatchCopyFileName);
-            try
-            {
-                AddRomHackLogMessage($"Copying rom patch from {SelectedPatchFilePath} to {romPatchCopyDestinationFullPath}");
-                File.Copy(SelectedPatchFilePath, romPatchCopyDestinationFullPath, true);
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to copy the rom patch from {SelectedPatchFilePath} to {romPatchCopyDestinationFullPath}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to copy {SelectedPatchFilePath} to {romPatchCopyDestinationFullPath}");
-                return string.Empty;
-            }
-
             // get command line arguments and replace the actual rom and patch paths 
             string commandLineArgs = SelectedPatcher.CommandLine;
             try
             {
-                commandLineArgs = commandLineArgs.Replace("{patch}", $"\"{romPatchCopyDestinationFullPath}\"");
-                commandLineArgs = commandLineArgs.Replace("{rom}", $"\"{romCopyNewName}\"");
+                commandLineArgs = commandLineArgs.Replace("{patch}", $"\"{SelectedSourcePatchFile.SourceFilePath}\"");
+                commandLineArgs = commandLineArgs.Replace("{rom}", $"\"{SelectedSourceRomFile.SourceFilePath}\"");
 
                 AddRomHackLogMessage($"Command line argument: {commandLineArgs}");
             }
@@ -801,10 +724,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 return string.Empty;
             }
 
+
             // apply patch 
             try
             {
-                AddRomHackLogMessage($"Creating rom patch using {SelectedPatcher.Path} and {commandLineArgs}\n{ RomHackLog}");
+                AddRomHackLogMessage($"Creating rom patch using {SelectedPatcher.Path} and {commandLineArgs}");
 
                 var proc = new Process
                 {
@@ -826,7 +750,23 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
                 proc.WaitForExit();
 
-                AddRomHackLogMessage($"Rom patcher output: {processOutput}");
+
+                if(string.IsNullOrWhiteSpace(processOutput))
+                {
+                    processOutput = "The patching process produced no output";
+                }
+
+                // todo: looks like the output from pdx-ppf is very long and causing the import to hang - trim this string?
+                int outputlen = processOutput.Length;
+
+                LogHelper.Log($"Output length: {outputlen}");
+
+                if (outputlen > 300)
+                {
+                    outputlen = 300;
+                }
+
+                AddRomHackLogMessage($"Rom patcher output: {processOutput.Substring(0, outputlen)}");
 
                 if (!string.IsNullOrWhiteSpace(processError))
                 {
@@ -839,141 +779,58 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 LogHelper.LogException(ex, $"Attempting to patch rom using {SelectedPatcher.Path} with arguments {commandLineArgs}");
                 return string.Empty;
             }
-
-            string patchedRomFilePath = romCopyNewName;
-
-            // zip patched application if original was zipped
-            if (isZipped)
+            
+            // if cue file - need to update the cue file references 
+            if (sourceFileWasCue)
             {
-                try
-                {
-                    patchedRomFilePath = Path.Combine(tempDirectory, $"{cleanRomHackTitle}.zip");
+                CueSheetReader.ReplaceTextInCueFile(sourceCueFile, Path.GetFileNameWithoutExtension(SelectedGame.ApplicationPath), CleanRomHackTitle);
+            }            
 
-                    AddRomHackLogMessage($"Zipping {tempZipDirectory} to {patchedRomFilePath}");
+            // rename files to new CleanRomHackTitle, replacing the selected application file name with the new clean rom hack title 
+            string originalName = Path.GetFileNameWithoutExtension(SelectedGame.ApplicationPath);
+            DirectoryInfoHelper.RenameFolderAndFiles(romFolderInWorkingDirectory, originalName, CleanRomHackTitle);
 
-                    ZipFile.CreateFromDirectory(tempZipDirectory, patchedRomFilePath);
-                }
-                catch (Exception ex)
-                {
-                    AddRomHackLogMessage($"An unexpected error occurred while attempting to create zip file from {tempZipDirectory} to {patchedRomFilePath}: {ex.Message}");
-                    LogHelper.LogException(ex, $"Attempting to zip {tempZipDirectory} to {patchedRomFilePath}");
-                    return string.Empty;
-                }
-            }
-
-            AddRomHackLogMessage($"Patched rom file: {patchedRomFilePath}");
-
-            // create plug-in folder if it doesn't already exist 
-            try
+            // zip the rom folder if it was zipped 
+            string zipFileName = string.Empty;
+            if (sourceFileWasZipped)
             {
-                if (!Directory.Exists(DirectoryInfoHelper.Instance.PluginFolder))
-                {
-                    AddRomHackLogMessage($"Creating plugin folder: {DirectoryInfoHelper.Instance.PluginFolder}");
-                    Directory.CreateDirectory(DirectoryInfoHelper.Instance.PluginFolder);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to check/create folder {DirectoryInfoHelper.Instance.PluginFolder}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to check/create folder {DirectoryInfoHelper.Instance.PluginFolder}");
-                return string.Empty;
-            }
-
-            // create ../plugin/rom hacks if it doesn't exist
-            string pluginRomHacksDirectory = Path.Combine(DirectoryInfoHelper.Instance.PluginFolder, "Rom Hacks");
-            try
-            {
-                if (!Directory.Exists(pluginRomHacksDirectory))
-                {
-                    AddRomHackLogMessage($"Creating plugin rom hacks folder: {pluginRomHacksDirectory}");
-                    Directory.CreateDirectory(pluginRomHacksDirectory);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to check/create folder {pluginRomHacksDirectory}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to check/create folder {pluginRomHacksDirectory}");
-                return string.Empty;
-            }
-
-            // create ../plugin/rom hacks/{rom hack platform} if it doesn't exist
-            string pluginRomHacksPlatformDirectory = Path.Combine(pluginRomHacksDirectory, RomHackPlatform.PlatformName);
-            try
-            {
-                if (!Directory.Exists(pluginRomHacksPlatformDirectory))
-                {
-                    AddRomHackLogMessage($"Creating plugin rom hacks platform folder: {pluginRomHacksPlatformDirectory}");
-                    Directory.CreateDirectory(pluginRomHacksPlatformDirectory);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to check/create folder {pluginRomHacksPlatformDirectory}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to check/create folder {pluginRomHacksPlatformDirectory}");
-                return string.Empty;
-            }
-
-            // create ../plugin/rom hacks/{rom hack platform}/{rom hack title} if it doesn't exist 
-            string pluginRomHacksPlatformGameDirectory = Path.Combine(pluginRomHacksPlatformDirectory, cleanRomHackTitle);
-            try
-            {
-                if (!Directory.Exists(pluginRomHacksPlatformGameDirectory))
-                {
-                    AddRomHackLogMessage($"Creating plugin rom hacks game folder {pluginRomHacksPlatformGameDirectory}");
-                    Directory.CreateDirectory(pluginRomHacksPlatformGameDirectory);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to check/create folder {pluginRomHacksPlatformGameDirectory}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to check/create folder {pluginRomHacksPlatformGameDirectory}");
-                return string.Empty;
+                zipFileName = Path.Combine(workingDirectory, CleanRomHackTitle + ".zip");
+                ZipFile.CreateFromDirectory(romFolderInWorkingDirectory, zipFileName);
             }
 
             // fix file and folder attributes 
             try
             {
-                AddRomHackLogMessage($"Fixing file attributes on {tempDirectory}");
-                DirectoryInfoHelper.FixDirectoryAttributes(new DirectoryInfo(tempDirectory));
+                AddRomHackLogMessage($"Fixing file attributes on {workingDirectory}");
+                DirectoryInfoHelper.FixDirectoryAttributes(new DirectoryInfo(workingDirectory));
             }
             catch (Exception ex)
             {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to fix directory attributes on {tempDirectory}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to fix attributes on folder {tempDirectory}");
+                AddRomHackLogMessage($"An unexpected error occurred while attempting to fix directory attributes on {workingDirectory}: {ex.Message}");
+                LogHelper.LogException(ex, $"Attempting to fix attributes on folder {workingDirectory}");
                 return string.Empty;
             }
 
-            // move patch files to plugin/patches/{platform}/{rom hack title} ? 
+            // identify destination directory - LB platform has a games directory
+            string finalDestinationFolder = string.IsNullOrWhiteSpace(RomHackPlatform.Folder)
+                ? Path.Combine(DirectoryInfoHelper.Instance.LaunchboxGamesPath, RomHackPlatform.Name)
+                : RomHackPlatform.Folder;
 
-            // copy the patch to the game directory
-            string romPatchFinalDestinationFileName = Path.Combine(pluginRomHacksPlatformGameDirectory, romPatchCopyFileName);
-            try
+            string finalDestinationFile;
+            if (sourceFileWasZipped)
             {
-                AddRomHackLogMessage($"Copying patch to plugin rom hacks game folder {romPatchCopyDestinationFullPath} to {romPatchFinalDestinationFileName}");
+                // if zipped - move zip file to destination directory 
+                finalDestinationFile = Path.Combine(finalDestinationFolder, Path.GetFileName(zipFileName));
+                File.Copy(zipFileName, finalDestinationFile, true);
+            }
+            else
+            {
+                // if not zipped - move all files from the rom folder to the destination directory 
+                DirectoryInfoHelper.DirectoryCopy(romFolderInWorkingDirectory, finalDestinationFolder, true);
 
-                File.Copy(romPatchCopyDestinationFullPath, romPatchFinalDestinationFileName, true);
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to copy rom patch to game folder from {romPatchCopyDestinationFullPath} to {romPatchFinalDestinationFileName}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to copy rom patch to game folder from {romPatchCopyDestinationFullPath} to {romPatchFinalDestinationFileName}");
-                return string.Empty;
-            }
-
-            // copy the patched game to the game directory 
-            // ..\LaunchBox\Games\{Platform}\
-            string finalRomHackFileName = Path.GetFileName(patchedRomFilePath);
-            string patchedGameFinalDestinationFileName = Path.Combine(DirectoryInfoHelper.Instance.LaunchboxGamesPath, RomHackPlatform.PlatformName, finalRomHackFileName);
-            DirectoryInfoHelper.CreateDirectoryIfNotExists(patchedGameFinalDestinationFileName);
-            try
-            {
-                File.Copy(patchedRomFilePath, patchedGameFinalDestinationFileName, true);
-            }
-            catch (Exception ex)
-            {
-                AddRomHackLogMessage($"An unexpected error occurred while attempting to copy patched rom to game folder from {patchedRomFilePath} to {patchedGameFinalDestinationFileName}: {ex.Message}");
-                LogHelper.LogException(ex, $"Attempting to copy patched rom to game folder from {patchedRomFilePath} to {patchedGameFinalDestinationFileName}");
-                return string.Empty;
+                // get a handle on the new application file
+                string originalFileExtension = Path.GetExtension(SelectedGame.ApplicationPath);
+                finalDestinationFile = Path.Combine(finalDestinationFolder, CleanRomHackTitle + originalFileExtension);
             }
 
             // delete temp dir
@@ -987,46 +844,20 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 LogHelper.LogException(ex, "Deleting temp directory");
             }
 
-            return patchedGameFinalDestinationFileName;
-        }
-
-        private static string CreateTempDirectory()
-        {
-            // make sure plugin folder exists 
-            string pluginFolder = DirectoryInfoHelper.Instance.PluginFolder;
-            DirectoryInfoHelper.CreateDirectoryIfNotExists(pluginFolder);
-
-            // make sure temp folder exists 
-            string pluginTempFolder = DirectoryInfoHelper.Instance.PluginTempFolder;
-            DirectoryInfoHelper.CreateDirectoryIfNotExists(pluginTempFolder);
-
-            // create a new unique folder to work out of in the temp directory
-            string tempDirGuid = Guid.NewGuid().ToString();
-            string tempDir = Path.Combine(pluginTempFolder, tempDirGuid);
-            if (!Directory.Exists(tempDir))
-            {
-                Directory.CreateDirectory(tempDir);
-            }
-
-            return tempDir;
+            return finalDestinationFile;
         }
 
         private void OnSelectNoAdditionalAppsExecute()
         {
-            AdditionalAppToCopy[] tempAdditionalAppTopCopy = AdditionalAppsToCopy.ToArray();
-
-            AdditionalAppsToCopy.Clear();
-            foreach (AdditionalAppToCopy additionalAppToCopy in tempAdditionalAppTopCopy)
-            {
-                AdditionalAppsToCopy.Add(new AdditionalAppToCopy()
-                {
-                    AdditionalApplication = additionalAppToCopy.AdditionalApplication,
-                    Copy = false
-                });
-            }
+            SelectAllAdditionalApps(false);
         }
 
         private void OnSelectAllAdditionalAppsExecute()
+        {
+            SelectAllAdditionalApps(true);
+        }
+
+        private void SelectAllAdditionalApps(bool _copy)
         {
             AdditionalAppToCopy[] tempAdditionalAppTopCopy = AdditionalAppsToCopy.ToArray();
 
@@ -1036,62 +867,56 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 AdditionalAppsToCopy.Add(new AdditionalAppToCopy()
                 {
                     AdditionalApplication = additionalAppToCopy.AdditionalApplication,
-                    Copy = true
+                    Copy = _copy
+                });
+            }
+        }
+
+        private void SelectAllVideos(bool _copy)
+        {
+            VideoToCopy[] tempVideosToCopy = VideosToCopy.ToArray();
+
+            VideosToCopy.Clear();
+            foreach (VideoToCopy videoToCopy in tempVideosToCopy)
+            {
+                VideosToCopy.Add(new VideoToCopy()
+                {
+                    VideoType = videoToCopy.VideoType,
+                    VideoPath = videoToCopy.VideoPath,
+                    Copy = _copy
                 });
             }
         }
 
         private void OnSelectNoVideosExecute()
         {
-            VideoToCopy[] tempVideosToCopy = VideosToCopy.ToArray();
-
-            VideosToCopy.Clear();
-            foreach (VideoToCopy videoToCopy in tempVideosToCopy)
-            {
-                VideosToCopy.Add(new VideoToCopy()
-                {
-                    VideoType = videoToCopy.VideoType,
-                    VideoPath = videoToCopy.VideoPath,
-                    Copy = false
-                });
-            }
+            SelectAllVideos(false);
         }
 
         private void OnSelectAllVideosExecute()
         {
-            VideoToCopy[] tempVideosToCopy = VideosToCopy.ToArray();
-
-            VideosToCopy.Clear();
-            foreach (VideoToCopy videoToCopy in tempVideosToCopy)
-            {
-                VideosToCopy.Add(new VideoToCopy()
-                {
-                    VideoType = videoToCopy.VideoType,
-                    VideoPath = videoToCopy.VideoPath,
-                    Copy = true
-                });
-            }
+            SelectAllVideos(true);
         }
+
 
         private void OnSelectNoImagesExecute()
         {
-            ImageToCopy[] tempImageToCopy = ImagesToCopy.ToArray();
-
-            ImagesToCopy.Clear();
-            foreach (ImageToCopy imageToCopy in tempImageToCopy)
-            {
-                ImagesToCopy.Add(new ImageToCopy() { ImageDetails = imageToCopy.ImageDetails, Copy = false });
-            }
+            SelectAllImages(false);
         }
 
         private void OnSelectAllImagesExecute()
         {
+            SelectAllImages(true);
+        }
+
+        private void SelectAllImages(bool _copy)
+        {
             ImageToCopy[] tempImageToCopy = ImagesToCopy.ToArray();
 
             ImagesToCopy.Clear();
             foreach (ImageToCopy imageToCopy in tempImageToCopy)
             {
-                ImagesToCopy.Add(new ImageToCopy() { ImageDetails = imageToCopy.ImageDetails, Copy = true });
+                ImagesToCopy.Add(new ImageToCopy() { ImageDetails = imageToCopy.ImageDetails, Copy = _copy });
             }
         }
 
@@ -1100,6 +925,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             OpenFileDialog openFileDialog;
             openFileDialog = new OpenFileDialog();
 
+            // todo: create system setting for default browse for patch file path 
             string downloadsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
             if (Directory.Exists(downloadsFolder))
@@ -1119,14 +945,39 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 // default RomHackTitle from selected patch file 
                 RomHackTitle = Path.GetFileNameWithoutExtension(SelectedPatchFilePath);
 
-                // re-prompt if it's a zip file to select the patch from inside the zip
-                if (openFileDialog.FileName.EndsWith(".zip"))
+                // create a "Patch" folder in the working directory and copy the selected patch file there 
+                string patchFolderInWorkingDirectory = Path.Combine(workingDirectory, "Patch");
+
+                // delete the patch folder so that we start with a fresh set of patch files 
+                if (Directory.Exists(patchFolderInWorkingDirectory))
                 {
-                    openFileDialog.Title = "Select patch file inside the zip";
-                    openFileDialog.InitialDirectory = openFileDialog.FileName;
-                    if (openFileDialog.ShowDialog() == true)
+                    Directory.Delete(patchFolderInWorkingDirectory, true);
+                }
+
+                // (re)create the folder 
+                Directory.CreateDirectory(patchFolderInWorkingDirectory);
+
+                if (!SevenZipHelper.IsArchiveFile(SelectedPatchFilePath))
+                {
+                    // if it's not an archive file then just copy the patch file into the inner patch folder path 
+                    File.Copy(SelectedPatchFilePath, Path.Combine(patchFolderInWorkingDirectory, Path.GetFileName(SelectedPatchFilePath)));
+                }
+                else
+                {
+                    // extract the selected file to the unarchived patch folder in the working directory 
+                    SevenZipHelper.Extract(SelectedPatchFilePath, patchFolderInWorkingDirectory);
+                }
+
+                SourcePatchFiles.Clear();
+
+                IEnumerable<string> patchFiles = Directory.EnumerateFiles(patchFolderInWorkingDirectory, "*", SearchOption.AllDirectories);
+                foreach (string patchFile in patchFiles)
+                {
+                    SourceFile sourceFile = new SourceFile(patchFile);
+                    SourcePatchFiles.Add(sourceFile);
+                    if (DirectoryInfoHelper.IsPatchFile(patchFile))
                     {
-                        SelectedPatchFilePath = openFileDialog.FileName;
+                        SelectedSourcePatchFile = sourceFile;
                     }
                 }
             }
@@ -1149,7 +1000,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 selectedPatcher = value;
                 OnPropertyChanged("SelectedPatcher");
-                
+
                 // raise the event that determines if the create button is enabled
                 InvalidateCommands();
             }
@@ -1176,6 +1027,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 romHackTitle = value;
                 OnPropertyChanged("RomHackTitle");
 
+                // get the clean title 
+                CleanRomHackTitle = DirectoryInfoHelper.GetCleanFileName(RomHackTitle);
+
                 // raise the event that determines if the create button is enabled
                 InvalidateCommands();
             }
@@ -1191,7 +1045,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
-        public PatcherPlatform RomHackPlatform
+        public IPlatform RomHackPlatform
         {
             get { return romHackPlatform; }
             set
@@ -1419,6 +1273,116 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        public string RomHackNotes
+        {
+            get { return romHackNotes; }
+            set
+            {
+                romHackNotes = value;
+                OnPropertyChanged("RomHackNotes");
+            }
+        }
+
+        public string RomHackSortTitle
+        {
+            get { return romHackSortTitle; }
+            set
+            {
+                romHackSortTitle = value;
+                OnPropertyChanged("RomHackSortTitle");
+            }
+        }
+
+        public bool RomHackFavorite
+        {
+            get { return romHackFavorite; }
+            set
+            {
+                romHackFavorite = value;
+                OnPropertyChanged("RomHackFavorite");
+            }
+        }
+
+        public bool RomHackPortable
+        {
+            get { return romHackPortable; }
+            set
+            {
+                romHackPortable = value;
+                OnPropertyChanged("RomHackPortable");
+            }
+        }
+
+        public bool RomHackCompleted
+        {
+            get { return romHackCompleted; }
+            set
+            {
+                romHackCompleted = value;
+                OnPropertyChanged("RomHackCompleted");
+            }
+        }
+
+        public bool RomHackHide
+        {
+            get { return romHackHide; }
+            set
+            {
+                romHackHide = value;
+                OnPropertyChanged("RomHackHide");
+            }
+        }
+
+        public bool RomHackBroken
+        {
+            get { return romHackBroken; }
+            set
+            {
+                romHackBroken = value;
+                OnPropertyChanged("RomHackBroken");
+            }
+        }
+
+        public bool? RomHackInstalled
+        {
+            get { return romHackInstalled; }
+            set
+            {
+                romHackInstalled = value;
+                OnPropertyChanged("RomHackInstalled");
+            }
+        }
+
+        public SourceFile SelectedSourceRomFile
+        {
+            get { return selectedSourceRomFile; }
+            set
+            {
+                selectedSourceRomFile = value;
+                OnPropertyChanged("SelectedSourceRomFile");
+            }
+        }
+
+        public SourceFile SelectedSourcePatchFile
+        {
+            get { return selectedSourcePatchFile; }
+            set
+            {
+                selectedSourcePatchFile = value;
+                OnPropertyChanged("SelectedSourcePatchFile");
+            }
+        }
+
+        public string CleanRomHackTitle
+        {
+            get { return cleanRomHackTitle; }
+            set
+            {
+                cleanRomHackTitle = value;
+                OnPropertyChanged("CleanRomHackTitle");
+            }
+        }
+
         public string SelectedTabPage
         {
             get { return selectedTabPage; }
@@ -1586,86 +1550,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 romHackVisibility = value;
                 OnPropertyChanged("RomHackVisibility");
-            }
-        }
-
-        public string RomHackNotes
-        {
-            get { return romHackNotes; }
-            set
-            {
-                romHackNotes = value;
-                OnPropertyChanged("RomHackNotes");
-            }
-        }
-
-        public string RomHackSortTitle
-        {
-            get { return romHackSortTitle; }
-            set
-            {
-                romHackSortTitle = value;
-                OnPropertyChanged("RomHackSortTitle");
-            }
-        }
-
-        public bool RomHackFavorite
-        {
-            get { return romHackFavorite; }
-            set
-            {
-                romHackFavorite = value;
-                OnPropertyChanged("RomHackFavorite");
-            }
-        }
-
-        public bool RomHackPortable
-        {
-            get { return romHackPortable; }
-            set
-            {
-                romHackPortable = value;
-                OnPropertyChanged("RomHackPortable");
-            }
-        }
-
-        public bool RomHackCompleted
-        {
-            get { return romHackCompleted; }
-            set
-            {
-                romHackCompleted = value;
-                OnPropertyChanged("RomHackCompleted");
-            }
-        }
-
-        public bool RomHackHide
-        {
-            get { return romHackHide; }
-            set
-            {
-                romHackHide = value;
-                OnPropertyChanged("RomHackHide");
-            }
-        }
-
-        public bool RomHackBroken
-        {
-            get { return romHackBroken; }
-            set
-            {
-                romHackBroken = value;
-                OnPropertyChanged("RomHackBroken");
-            }
-        }
-
-        public bool? RomHackInstalled
-        {
-            get { return romHackInstalled; }
-            set
-            {
-                romHackInstalled = value;
-                OnPropertyChanged("RomHackInstalled");
             }
         }
 

@@ -30,7 +30,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
+
             <Image Grid.Column="0" Margin="0,2,0,0"
                RenderOptions.BitmapScalingMode="HighQuality" Stretch="Uniform" 
                HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -89,26 +89,40 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Content="Patching" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.Title}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
 
-                <Label Grid.Row="1" Grid.Column="0" Content="Patcher" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatcher.Name}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+                <Label Grid.Row="0" Grid.Column="0" Content="Patcher" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatcher.Name}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
 
-                <Label Grid.Row="2" Grid.Column="0" Content="Patch" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
-                <Button Grid.Row="2" Grid.Column="5"  Content="..." HorizontalAlignment="Right" VerticalAlignment="Stretch" Command="{Binding SelectPatchFileCommand}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
-                
-                <Label Grid.Row="3" Grid.Column="0" Content="Title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="1" Grid.Column="0" Content="Patching" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.Title}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.ApplicationPath}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+                <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding SourceRomFiles}" 
+                          DisplayMemberPath="SourceFileName" 
+                          SelectedItem="{Binding SelectedSourceRomFile, Mode=TwoWay}"/>
 
-                <Label Grid.Row="4" Grid.Column="0" Content="Sort title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackSortTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="4" Grid.Column="0" Content="Patch" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Button Grid.Row="4" Grid.Column="5"  Content="..." HorizontalAlignment="Right" VerticalAlignment="Stretch" Command="{Binding SelectPatchFileCommand}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
 
-                <Label Grid.Row="5" Grid.Column="0" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <ComboBox Grid.Row="5" Grid.Column="1" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
+                <Label Grid.Row="5" Grid.Column="0" Content="Patch to apply" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding SourcePatchFiles}" 
+                          DisplayMemberPath="SourceFileName" 
+                          SelectedItem="{Binding SelectedSourcePatchFile, Mode=TwoWay}"/>
+
+                <Label Grid.Row="6" Grid.Column="0" Content="Title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="7" Grid.Column="0" Content="Sort title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackSortTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+
+                <Label Grid.Row="8" Grid.Column="0" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="8" Grid.Column="1" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
                           ItemsSource="{Binding PlatformLookup}" 
-                          DisplayMemberPath="PlatformName" 
+                          DisplayMemberPath="Name" 
                           SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}"/>
             </Grid>
         </StackPanel>
@@ -169,7 +183,7 @@
                 <Label Grid.Row="4" Grid.Column="2" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
                 <ComboBox Grid.Row="4" Grid.Column="3" Grid.ColumnSpan="3" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
                           ItemsSource="{Binding PlatformLookup}" 
-                          DisplayMemberPath="PlatformName" 
+                          DisplayMemberPath="Name" 
                           SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}" />
 
                 <Label Grid.Row="5" Grid.Column="0" Content="Developers" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
@@ -286,7 +300,7 @@
                 <TextBlock Text="Images" Background="#2A2B34" Foreground="#D3D3D5" 
                            HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
             </Border>
-            
+
             <StackPanel Grid.Row="1" Grid.Column="0" Margin="5,0,5,5" 
                         HorizontalAlignment="Right" VerticalAlignment="Stretch" Orientation="Horizontal">
                 <Button Content="All" Width="80" Height="30" Margin="5,0,0,0" Command="{Binding SelectAllImagesCommand}" />
@@ -372,7 +386,7 @@
             </Border>
             <TextBlock Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,5"
                        TextWrapping="Wrap" TextAlignment="Left"
-                       Text="{Binding CreateRomHackLog}" 
+                       Text="{Binding RomHackLog}" 
                        Background="#343542" Foreground="#D3D3D5"/>
         </Grid>
 
@@ -382,126 +396,4 @@
             <Button Content="Cancel" Click="Button_Click" Width="80" Height="30" Background="#3F404E" Foreground="#D3D3D5" Margin="0,0,10,0"/>
         </StackPanel>
     </Grid>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!--
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <Grid Grid.Row="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-
-            <DockPanel Grid.Row="3" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding VideosToCopyVisibility}">
-                <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
-                    <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllVideosCommand}" />
-                    <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoVideosCommand}" />
-                </StackPanel>
-                <DataGrid   ItemsSource="{Binding VideosToCopy}" 
-                            SelectedItem="{Binding SelectedVideoToCopy, Mode=TwoWay}"
-                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Copy">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Video type" IsReadOnly="True" Width="*" Binding="{Binding VideoType}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
-
-            <Label Grid.Row="4" Grid.Column="0" Content="Additional apps to copy" Margin="10 0" Visibility="{Binding AdditionalAppsToCopyVisibility}"/>
-            <DockPanel Grid.Row="5" Grid.Column="0" Margin="10 0 10 10" Visibility="{Binding AdditionalAppsToCopyVisibility}">
-                <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
-                    <Button Content="All" Margin="5,0,5,5" Width="50" Command="{Binding SelectAllAdditionalAppsCommand}" />
-                    <Button Content="None" Margin="5,0,5,5" Width="50" Command="{Binding SelectNoAdditionalAppsCommand}" />
-                </StackPanel>
-                <DataGrid ItemsSource="{Binding AdditionalAppsToCopy}" 
-                          SelectedItem="{Binding SelectedAdditionalAppToCopy, Mode=TwoWay}"
-                          AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Copy">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Copy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Name" IsReadOnly="True" Width="*" Binding="{Binding AdditionalApplication.Name}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
-
-            <Image  Grid.Row="0" Grid.RowSpan="6" Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality"
-                    Margin="10 0 10 10" Source="{Binding SelectedImageToCopy.ImageDetails.FilePath}" 
-                   Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-            </Image>
-        </Grid>
-
-        <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Create" Width="75" Margin="5" Command="{Binding CreateRomHackCommand}"/>
-            <Button Content="Cancel" Width="75" Margin="5" Command="{Binding CancelCommand}"/>
-        </StackPanel>
-
-        <Grid Grid.Row="0" Grid.RowSpan="12" Visibility="{Binding CreateRomHackLogVisibility}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Stretch" TextWrapping="NoWrap"
-                       Text="Patching process log" 
-                       Background="Black" Foreground="WhiteSmoke"/>
-            <TextBlock Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="NoWrap"
-                       Text="{Binding CreateRomHackLog}" 
-                       Background="Black" Foreground="WhiteSmoke"/>
-            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Center">
-                <Button Content="Close log" Width="80" Command="{Binding CloseRomHackingLogCommand}"/>
-            </StackPanel>
-        </Grid>
-    </Grid>
-    -->
-    
-    
-    
 </Window>

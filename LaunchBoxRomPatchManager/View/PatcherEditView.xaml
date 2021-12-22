@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -34,21 +35,27 @@
         <Label Grid.Row="6" Content="Command line" Margin="10 0"/>
         <TextBox Grid.Row="7" Text="{Binding PatcherCommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
 
-        <DockPanel Grid.Row="8" Margin="10">
-            <StackPanel DockPanel.Dock="Right">
-                <Button Content="Add" Width="125" Margin="5,0,5,5" Command="{Binding AddPlatformCommand}"/>
-                <Button Content="Remove" Width="125" Margin="5,0,5,5" Command="{Binding RemovePlatformCommand}"/>
-            </StackPanel>
-            <DataGrid ItemsSource="{Binding PatcherPlatforms}"
-                      SelectedItem="{Binding SelectedPatcherPlatform, Mode=TwoWay}"
-                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" RowHeaderWidth="0">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Platforms" Width="*" Binding="{Binding PlatformName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
+        <Label Grid.Row="8" Content="Platforms" Margin="10 0"/>
 
-        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
+        <Grid Grid.Row="9" Margin="10 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ListBox Grid.Column="0" SelectionMode="Single"
+                     ItemsSource="{Binding PatcherPlatforms}"
+                     SelectedItem="{Binding SelectedPatcherPlatform, Mode=TwoWay}"/>
+            <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                <Button Content="&lt;" Width="40" Margin="5" Command="{Binding AddPlatformCommand}"/>
+                <Button Content="&gt;" Width="40" Margin="5" Command="{Binding RemovePlatformCommand}"/>
+            </StackPanel>
+            <ListBox Grid.Column="2" SelectionMode="Single"
+                     ItemsSource="{Binding RemainingPlatforms}" 
+                     SelectedItem="{Binding SelectedRemainingPlatform, Mode=TwoWay}"/>
+        </Grid>
+        
+        <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" Margin="5" Command="{Binding SaveCommand}"/>
             <Button Content="Cancel" Width="75" Margin="5" Command="{Binding CloseCommand}"/>
         </StackPanel>

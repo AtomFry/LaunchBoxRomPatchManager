@@ -8,6 +8,8 @@ using Prism.Events;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Unbroken.LaunchBox.Plugins;
+using Unbroken.LaunchBox.Plugins.Data;
 
 namespace LaunchBoxRomPatchManager.ViewModel
 {
@@ -15,87 +17,89 @@ namespace LaunchBoxRomPatchManager.ViewModel
     {
         private PatcherDataProvider patcherDataProvider;
         private IEventAggregator eventAggregator;
+        private Patcher patcher;
+        private string selectedRemainingPlatform;
+        private string selectedPatcherPlatform;
 
+        public ICommand AddPlatformCommand { get; }
+        public ICommand RemovePlatformCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CloseCommand { get; }
         public ICommand BrowsePatcherPathCommand { get; }
-        private Patcher patcher;
-        public ObservableCollection<PatcherPlatform> PatcherPlatforms { get; set; }
-        private PatcherPlatform selectedPatcherPlatform;
-        public PatcherPlatform SelectedPatcherPlatform
-        {
-            get { return selectedPatcherPlatform; }
-            set
-            {
-                selectedPatcherPlatform = value;
-                OnPropertyChanged("SelectedPatcherPlatform");
 
-                InvalidateCommands();
-            }
-        }
-        public ICommand AddPlatformCommand { get; }
-        public ICommand RemovePlatformCommand { get; }
-
-
+        public ObservableCollection<string> PatcherPlatforms { get; set; }
+        public ObservableCollection<string> RemainingPlatforms { get; set; }
 
         public PatcherEditViewModel(Patcher _patcher)
         {
             patcher = _patcher;
-            PatcherPlatforms = new ObservableCollection<PatcherPlatform>();
-            foreach(PatcherPlatform patcherPlatform in patcher.Platforms)
-            {
-                PatcherPlatforms.Add(patcherPlatform);
-            }
-            PatcherPlatforms.CollectionChanged += PatcherPlatforms_CollectionChanged;
+            PatcherPlatforms = new ObservableCollection<string>();
+            RemainingPlatforms = new ObservableCollection<string>();
+
+            InitializePlatforms();
 
             eventAggregator = EventAggregatorHelper.Instance.EventAggregator;
             patcherDataProvider = new PatcherDataProvider();
 
+            AddPlatformCommand = new DelegateCommand(OnAddPatcherPlatformExecute);
+            RemovePlatformCommand = new DelegateCommand(OnRemovePatcherPlatformExecute);
             SaveCommand = new DelegateCommand(OnSaveExecuteAsync, OnSaveCanExecute);
             CloseCommand = new DelegateCommand(OnCloseExecute);
             BrowsePatcherPathCommand = new DelegateCommand(OnBrowsePatcherPathExecute);
+        }
 
-            AddPlatformCommand = new DelegateCommand(OnAddPatcherPlatformExecute);
-            RemovePlatformCommand = new DelegateCommand(OnRemovePatcherPlatformExecute, OnRemovePatcherPlatformCanExecute);
+        private void InitializePlatforms()
+        {
+            IPlatform[] allPlatforms = PluginHelper.DataManager.GetAllPlatforms();
 
+            foreach(IPlatform platform in allPlatforms)
+            {
+                if (patcher.Platforms.Contains(platform.Name))
+                {
+                    PatcherPlatforms.Add(platform.Name);
+                }
+                else
+                {
+                    RemainingPlatforms.Add(platform.Name);
+                }
+            }
 
+            PatcherPlatforms.CollectionChanged += PatcherPlatforms_CollectionChanged;
         }
 
         private void OnRemovePatcherPlatformExecute()
         {
-            PatcherPlatforms.Remove(SelectedPatcherPlatform);
-            SelectedPatcherPlatform = null;
-            OnPropertyChanged("SelectedPatcherPlatform");
-            OnPropertyChanged("PatcherPlatforms");
+            if(SelectedPatcherPlatform != null)
+            {
+                PatcherPlatforms.Remove(SelectedPatcherPlatform);
+                OnPropertyChanged("PatcherPlatforms");
 
-            InvalidateCommands();
-        }
-
-        private bool OnRemovePatcherPlatformCanExecute()
-        {
-            return SelectedPatcherPlatform != null;
+                // unselect the patcher platform 
+                SelectedPatcherPlatform = null;
+                OnPropertyChanged("SelectedPatcherPlatform");
+            }
         }
 
         private void OnAddPatcherPlatformExecute()
         {
-            SelectedPatcherPlatform = new PatcherPlatform();
-            PatcherPlatforms.Add(SelectedPatcherPlatform);
+            if(SelectedRemainingPlatform != null)
+            {
+                PatcherPlatforms.Add(SelectedRemainingPlatform);
+                OnPropertyChanged("PatcherPlatforms");
 
-            OnPropertyChanged("SelectedPatcherPlatform");
-            OnPropertyChanged("PatcherPlatforms");
-
-            InvalidateCommands();
+                // unselect the remaining patcher platform 
+                SelectedRemainingPlatform = null;
+                OnPropertyChanged("SelectedRemainingPatcherPlatform");
+            }
         }
 
         private void PatcherPlatforms_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             patcher.Platforms.Clear();
-            foreach(PatcherPlatform patcherPlatform in PatcherPlatforms)
+            foreach (string patcherPlatform in PatcherPlatforms)
             {
                 patcher.Platforms.Add(patcherPlatform);
             }
-
-            InvalidateCommands();
         }
 
         private void OnBrowsePatcherPathExecute()
@@ -124,7 +128,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
         private bool OnSaveCanExecute()
         {
-            // todo: check if it's safe to save
             return true;
         }
 
@@ -168,11 +171,31 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        public string SelectedPatcherPlatform
+        {
+            get { return selectedPatcherPlatform; }
+            set
+            {
+                selectedPatcherPlatform = value;
+                OnPropertyChanged("SelectedPatcherPlatform");
+                InvalidateCommands();
+            }
+        }
+
+        public string SelectedRemainingPlatform
+        {
+            get { return selectedRemainingPlatform; }
+            set
+            {
+                selectedRemainingPlatform = value;
+                OnPropertyChanged("SelectedRemainingPlatform");
+                InvalidateCommands();
+            }
+        }
+
         private void InvalidateCommands()
         {
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
-            ((DelegateCommand)RemovePlatformCommand).RaiseCanExecuteChanged();
-            ((DelegateCommand)AddPlatformCommand).RaiseCanExecuteChanged();            
         }
     }
 }

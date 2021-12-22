@@ -29,7 +29,7 @@ namespace LaunchBoxRomPatchManager.Helpers
         {
             get
             {
-                if(string.IsNullOrWhiteSpace(sevenZipPath))
+                if (string.IsNullOrWhiteSpace(sevenZipPath))
                 {
                     sevenZipPath = $"{ApplicationPath}\\ThirdParty\\7-Zip\\7z.exe";
                 }
@@ -42,7 +42,7 @@ namespace LaunchBoxRomPatchManager.Helpers
         {
             get
             {
-                if(string.IsNullOrWhiteSpace(launchboxVideosPath))
+                if (string.IsNullOrWhiteSpace(launchboxVideosPath))
                 {
                     launchboxVideosPath = $"{ApplicationPath}\\Videos";
                 }
@@ -69,7 +69,7 @@ namespace LaunchBoxRomPatchManager.Helpers
         {
             get
             {
-                if(string.IsNullOrWhiteSpace(launchboxGamesPath))
+                if (string.IsNullOrWhiteSpace(launchboxGamesPath))
                 {
                     launchboxGamesPath = $"{ApplicationPath}\\Games";
                 }
@@ -121,7 +121,7 @@ namespace LaunchBoxRomPatchManager.Helpers
         {
             get
             {
-                if(string.IsNullOrWhiteSpace(romPatcherDataFolderPath))
+                if (string.IsNullOrWhiteSpace(romPatcherDataFolderPath))
                 {
                     romPatcherDataFolderPath = $"{PluginFolder}\\Data";
                 }
@@ -147,7 +147,7 @@ namespace LaunchBoxRomPatchManager.Helpers
         {
             get
             {
-                if(string.IsNullOrWhiteSpace(pluginTempFolder))
+                if (string.IsNullOrWhiteSpace(pluginTempFolder))
                 {
                     pluginTempFolder = $"{PluginFolder}\\Temp";
                 }
@@ -279,10 +279,99 @@ namespace LaunchBoxRomPatchManager.Helpers
                 FixDirectoryAttributes(subDir);
             }
 
-            foreach(var file in directory.GetFiles())
+            foreach (var file in directory.GetFiles())
             {
                 file.Attributes = FileAttributes.Normal;
                 file.IsReadOnly = false;
+            }
+        }
+
+        public static bool IsPatchFile(string fileNameWithExtension)
+        {
+            string fileToCheck = fileNameWithExtension.ToLower();
+
+            // todo: create configuration that allows you to specify default patch files and use that instead of hard codes
+            if (fileToCheck.EndsWith(".ips")) return true;
+            if (fileToCheck.EndsWith(".bps")) return true;
+            if (fileToCheck.EndsWith(".ppf")) return true;
+
+            return false;
+        }
+
+        public static bool IsRomFIle(string fileNameWithExtension)
+        {
+            string fileToCheck = fileNameWithExtension.ToLower();
+
+            if (fileToCheck.EndsWith(".cue")) return false;
+            if (fileToCheck.EndsWith(".txt")) return false;
+
+            return true;
+        }
+
+        public static void RenameFolderAndFiles(string path, string source, string dest)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+
+            foreach (DirectoryInfo innerDirectoryInfo in directoryInfo.GetDirectories("*", SearchOption.TopDirectoryOnly))
+            {
+                RenameFolderAndFiles(innerDirectoryInfo.Parent.FullName + @"\" + innerDirectoryInfo.Name, source, dest);
+
+                string strFoldername = innerDirectoryInfo.Name;
+                if (strFoldername.Contains(source))
+                {
+                    strFoldername = strFoldername.Replace(source, dest);
+                    string strFolderRoot = innerDirectoryInfo.Parent.FullName + "\\" + strFoldername;
+
+                    innerDirectoryInfo.MoveTo(strFolderRoot);
+                }
+            }
+
+            FileInfo[] fileInfos = directoryInfo.GetFiles();
+            foreach (FileInfo fileInfo in fileInfos)
+            {
+                string fileName = fileInfo.Name;
+                if (fileName.Contains(source))
+                {
+                    fileName = fileName.Replace(source, dest);
+                    string fileRoot = directoryInfo.FullName + "\\" + fileName;
+                    fileInfo.MoveTo(fileRoot);
+                }
+            }
+        }
+
+        public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // If the destination directory doesn't exist, create it.       
+            Directory.CreateDirectory(destDirName);
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+                }
             }
         }
     }
