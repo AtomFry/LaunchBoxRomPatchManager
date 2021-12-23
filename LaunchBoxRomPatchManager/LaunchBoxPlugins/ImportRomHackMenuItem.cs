@@ -20,7 +20,6 @@ namespace LaunchBoxRomPatchManager.LaunchBoxPlugins
 
         public bool GetIsValidForGame(IGame selectedGame)
         {
-            // todo: resolve rom patcher and only show menu item if there is one
             return true;
         }
 

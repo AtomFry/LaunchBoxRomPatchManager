@@ -22,8 +22,8 @@ namespace LaunchBoxRomPatchManager.View
     /// </summary>
     public partial class PatcherListView : Window
     {
-        PatcherListViewModel patcherListViewModel;
-        EventAggregator eventAggregator;
+        readonly PatcherListViewModel patcherListViewModel;
+        readonly EventAggregator eventAggregator;
 
         public PatcherListView()
         {

@@ -21,8 +21,8 @@ namespace LaunchBoxRomPatchManager.View
     /// </summary>
     public partial class ImportRomHackView : Window
     {
-        private ImportRomHackViewModel importRomHackViewModel;
-        private EventAggregator eventAggregator;
+        private readonly ImportRomHackViewModel importRomHackViewModel;
+        private readonly EventAggregator eventAggregator;
 
         public ImportRomHackView(ImportRomHackViewModel _importRomHackViewModel)
         {

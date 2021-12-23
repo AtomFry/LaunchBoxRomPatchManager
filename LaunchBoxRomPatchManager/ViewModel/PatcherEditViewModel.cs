@@ -18,9 +18,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
 {
     public class PatcherEditViewModel : ViewModelBase.ViewModelBase
     {
-        private PatcherDataProvider patcherDataProvider;
-        private IEventAggregator eventAggregator;
-        private Patcher patcher;
+        private readonly PatcherDataProvider patcherDataProvider;
+        private readonly IEventAggregator eventAggregator;
+        private readonly Patcher patcher;
         private string selectedRemainingPlatform;
         private string selectedPatcherPlatform;
 
@@ -109,13 +109,16 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private void OnBrowsePatcherPathExecute()
         {
             OpenFileDialog openFileDialog;
-            openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = Directory.Exists(Path.GetDirectoryName(PatcherPath)) 
-                ? Path.GetDirectoryName(PatcherPath) 
-                : DirectoryInfoHelper.Instance.ApplicationPath;
+            openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = Directory.Exists(Path.GetDirectoryName(PatcherPath))
+                    ? Path.GetDirectoryName(PatcherPath)
+                    : DirectoryInfoHelper.Instance.ApplicationPath,
 
-            openFileDialog.Title = "Select patcher executable";
-            if(openFileDialog.ShowDialog() == true)
+                Title = "Select patcher executable"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
             {
                 PatcherPath = openFileDialog.FileName;
 

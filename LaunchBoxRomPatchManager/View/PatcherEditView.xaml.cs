@@ -10,7 +10,7 @@ namespace LaunchBoxRomPatchManager.View
 
     public partial class PatcherEditView : Window
     {
-        EventAggregator eventAggregator;
+        readonly EventAggregator eventAggregator;
 
         public PatcherEditView(PatcherEditViewModel patcherEditViewModel)
         {

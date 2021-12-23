@@ -58,6 +58,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private string romFolderInWorkingDirectory;
         private SourceFile selectedSourceRomFile;
         private SourceFile selectedSourcePatchFile;
+        private bool patchingInProgress;
 
         private IPlatform romHackPlatform;
         private string romHackTitle;
@@ -365,6 +366,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
         {
             // check if it's safe to create the rom hack - check required fields 
 
+            // disable when rom hack creation is in progress
+            if (patchingInProgress) return false;
+
             // selected patcher cannot be blank
             if (SelectedPatcher == null) return false;
 
@@ -380,14 +384,14 @@ namespace LaunchBoxRomPatchManager.ViewModel
             // rom hack title cannot be blank
             if (string.IsNullOrWhiteSpace(RomHackTitle)) return false;
 
-            // todo: need to disable when rom hack creation is in progress
-
             return true;
         }
 
         private async void OnCreateRomHackExecuteAsync()
         {
             bool success = false;
+
+            patchingInProgress = true;
 
             // clear the log and make it visible
             RomHackLog = string.Empty;
@@ -664,6 +668,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 success = true;
             });
 
+            patchingInProgress = false;
+
             // close 
             if (success)
             {
@@ -678,31 +684,14 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
         private string GetVideoFolderForMediaType(string mediaType)
         {
-            string returnValue;
-
-            switch (mediaType)
+            string returnValue = mediaType switch
             {
-                case "Recording":
-                    returnValue = "Recordings";
-                    break;
-
-                case "Theme Video":
-                    returnValue = "Theme";
-                    break;
-
-                case "Trailer":
-                    returnValue = "Trailer";
-                    break;
-
-                case "Marquee":
-                    returnValue = "Marquee";
-                    break;
-
-                default:
-                    returnValue = string.Empty;
-                    break;
-            }
-
+                "Recording" => "Recordings",
+                "Theme Video" => "Theme",
+                "Trailer" => "Trailer",
+                "Marquee" => "Marquee",
+                _ => string.Empty,
+            };
             return returnValue;
         }
 
@@ -756,7 +745,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
                     processOutput = "The patching process produced no output";
                 }
 
-                // todo: looks like the output from pdx-ppf is very long and causing the import to hang - trim this string?
                 int outputlen = processOutput.Length;
 
                 LogHelper.Log($"Output length: {outputlen}");
@@ -784,7 +772,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             if (sourceFileWasCue)
             {
                 CueSheetReader.ReplaceTextInCueFile(sourceCueFile, Path.GetFileNameWithoutExtension(SelectedGame.ApplicationPath), CleanRomHackTitle);
-            }            
+            }
 
             // rename files to new CleanRomHackTitle, replacing the selected application file name with the new clean rom hack title 
             string originalName = Path.GetFileNameWithoutExtension(SelectedGame.ApplicationPath);
