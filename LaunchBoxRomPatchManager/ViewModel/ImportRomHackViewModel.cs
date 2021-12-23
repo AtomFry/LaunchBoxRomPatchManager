@@ -393,6 +393,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
             patchingInProgress = true;
 
+            InvalidateCommands();
+
             // clear the log and make it visible
             RomHackLog = string.Empty;
 
@@ -669,6 +671,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             });
 
             patchingInProgress = false;
+            InvalidateCommands();
 
             // close 
             if (success)
