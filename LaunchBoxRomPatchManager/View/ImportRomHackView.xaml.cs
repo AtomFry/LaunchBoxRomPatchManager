@@ -68,7 +68,10 @@ namespace LaunchBoxRomPatchManager.View
 
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            WindowState = WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
+            if (e.OriginalSource is Grid)
+            {
+                WindowState = WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
+            }
         }
     }
 }

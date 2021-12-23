@@ -3,6 +3,7 @@ using LaunchBoxRomPatchManager.Helpers;
 using LaunchBoxRomPatchManager.ViewModel;
 using Prism.Events;
 using System.Windows;
+using System.Windows.Input;
 
 namespace LaunchBoxRomPatchManager.View
 {
@@ -21,6 +22,15 @@ namespace LaunchBoxRomPatchManager.View
             DataContext = patcherEditViewModel;
 
             Closing += PatcherEditView_Closing;
+            PreviewKeyDown += PatcherEditView_PreviewKeyDown;
+        }
+
+        private void PatcherEditView_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
 
         private void PatcherEditView_Closing(object sender, System.ComponentModel.CancelEventArgs e)

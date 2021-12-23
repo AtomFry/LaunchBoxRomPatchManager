@@ -35,6 +35,15 @@ namespace LaunchBoxRomPatchManager.View
             patcherListViewModel = new PatcherListViewModel();
             DataContext = patcherListViewModel;
             Loaded += PatcherListView_Loaded;
+            PreviewKeyDown += PatcherListView_PreviewKeyDown;
+        }
+
+        private void PatcherListView_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
 
         private void OnPatcherListClose()
