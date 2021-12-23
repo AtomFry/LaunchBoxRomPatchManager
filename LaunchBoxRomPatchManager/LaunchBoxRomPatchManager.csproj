@@ -1,9 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="PatchManager\**" />
+    <EmbeddedResource Remove="PatchManager\**" />
+    <None Remove="PatchManager\**" />
+    <Page Remove="PatchManager\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="EmbeddedResources\RomHackingIcon.jpg" />
@@ -50,10 +57,43 @@
     <None Update="Dependencies\Prism.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\Floating\boring.zip">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\Floating\flips-linux">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\Floating\flips.exe">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\Floating\flipscfg.bin">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\Floating\license.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\Floating\src.zip">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\pdx-ppf3\contents.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\pdx-ppf3\file_id.diz">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\pdx-ppf3\ppfbin\applyppf\applyppf3.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\pdx-ppf3\ppfbin\applyppf\w32\ApplyPPF3.exe">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LaunchBoxRomPatchManager\LaunchBox\LaunchBoxRomPatchManager\Patchers\pdx-ppf3\readme.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)LaunchBoxRomPatchManager.dll&quot; &quot;C:\Users\Adam\Documents\LaunchBox\Plugins&quot; /K /D /H /Y&#xD;&#xA;xcopy &quot;$(TargetDir)LaunchBoxRomPatchManager.pdb&quot; &quot;C:\Users\Adam\Documents\LaunchBox\Plugins&quot; /K /D /H /Y&#xD;&#xA;xcopy &quot;$(TargetDir)Dependencies\Prism.dll&quot; &quot;C:\Users\Adam\Documents\LaunchBox\Plugins&quot; /K /D /H /Y" />
+    <Exec Command="xcopy &quot;$(TargetDir)LaunchBoxRomPatchManager.dll&quot; &quot;C:\Users\Adam\Documents\LaunchBox\Plugins&quot; /K /D /H /Y&#xD;&#xA;xcopy &quot;$(TargetDir)LaunchBoxRomPatchManager.pdb&quot; &quot;C:\Users\Adam\Documents\LaunchBox\Plugins&quot; /K /D /H /Y&#xD;&#xA;xcopy &quot;$(TargetDir)Dependencies\Prism.dll&quot; &quot;C:\Users\Adam\Documents\LaunchBox\Plugins&quot; /K /D /H /Y&#xD;&#xA;xcopy &quot;$(ProjectDir)$(ProjectName)\&quot; &quot;$(TargetDir)&quot; /K /D /H /Y /E&#xD;&#xA;xcopy &quot;$(TargetDir)\LaunchBox\&quot; &quot;C:\Users\Adam\Documents\LaunchBox\&quot; /K /D /H /Y /E&#xD;&#xA;" />
   </Target>
 
 </Project>

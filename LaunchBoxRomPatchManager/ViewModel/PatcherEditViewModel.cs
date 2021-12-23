@@ -6,7 +6,10 @@ using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Events;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using System.Windows.Input;
 using Unbroken.LaunchBox.Plugins;
 using Unbroken.LaunchBox.Plugins.Data;
@@ -50,7 +53,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
         private void InitializePlatforms()
         {
-            IPlatform[] allPlatforms = PluginHelper.DataManager.GetAllPlatforms();
+            IEnumerable<IPlatform> allPlatforms = PluginHelper.DataManager.GetAllPlatforms();
+            allPlatforms = allPlatforms.OrderBy(p => p.Name);
 
             foreach(IPlatform platform in allPlatforms)
             {
@@ -106,11 +110,16 @@ namespace LaunchBoxRomPatchManager.ViewModel
         {
             OpenFileDialog openFileDialog;
             openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            openFileDialog.InitialDirectory = Directory.Exists(Path.GetDirectoryName(PatcherPath)) 
+                ? Path.GetDirectoryName(PatcherPath) 
+                : DirectoryInfoHelper.Instance.ApplicationPath;
+
             openFileDialog.Title = "Select patcher executable";
             if(openFileDialog.ShowDialog() == true)
             {
                 PatcherPath = openFileDialog.FileName;
+
+                PatcherPath = PatcherPath.Replace(DirectoryInfoHelper.Instance.ApplicationPath + "\\", "");
             }
         }
 

@@ -85,8 +85,20 @@ namespace LaunchBoxRomPatchManager.DataAccess
                 // create a sample list 
                 List<Patcher> patchers = new List<Patcher>
                 {
-                    new Patcher{Id=Guid.NewGuid().ToString(), Name="FLIPS", Path="", CommandLine="{patch} {rom}"},
-                    new Patcher{Id=Guid.NewGuid().ToString(), Name="PPF-PDX", Path="", CommandLine="{rom} {patch}"}
+                    new Patcher
+                    {
+                        Id = Guid.NewGuid().ToString(), 
+                        Name = "FLIPS", 
+                        Path = $"LaunchBoxRomPatchManager\\Patchers\\Floating\\flips.exe", 
+                        CommandLine = "{patch} {rom}"
+                    },
+                    new Patcher
+                    {
+                        Id = Guid.NewGuid().ToString(), 
+                        Name = "PPF-PDX", 
+                        Path = $"LaunchBoxRomPatchManager\\Patchers\\pdx-ppf3\\ppfbin\\applyppf\\w32\\ApplyPPF3.exe", 
+                        CommandLine = "a {rom} {patch}"
+                    }
                 };
 
                 // save the file 

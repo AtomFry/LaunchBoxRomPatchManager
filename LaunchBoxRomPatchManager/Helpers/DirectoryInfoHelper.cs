@@ -97,7 +97,7 @@ namespace LaunchBoxRomPatchManager.Helpers
             {
                 if (string.IsNullOrWhiteSpace(pluginFolder))
                 {
-                    pluginFolder = $"{ApplicationPath}\\Plugins\\LaunchBoxRomPatchManager";
+                    pluginFolder = $"{ApplicationPath}\\LaunchBoxRomPatchManager";
                 }
                 return pluginFolder;
             }

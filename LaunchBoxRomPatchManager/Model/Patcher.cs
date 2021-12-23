@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using LaunchBoxRomPatchManager.Helpers;
+using System.Collections.Generic;
 
 namespace LaunchBoxRomPatchManager.Model
 {
@@ -14,5 +15,15 @@ namespace LaunchBoxRomPatchManager.Model
         public string Path { get; set; }
         public string CommandLine { get; set; }
         public List<string> Platforms { get; set; }
+
+        public string FullPath
+        {
+            get
+            {
+                return System.IO.Path.IsPathFullyQualified(Path)
+                    ? Path
+                    : System.IO.Path.Combine(DirectoryInfoHelper.Instance.ApplicationPath, Path);
+            }
+        }
     }
 }

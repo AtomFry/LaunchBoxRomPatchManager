@@ -728,13 +728,13 @@ namespace LaunchBoxRomPatchManager.ViewModel
             // apply patch 
             try
             {
-                AddRomHackLogMessage($"Creating rom patch using {SelectedPatcher.Path} and {commandLineArgs}");
+                AddRomHackLogMessage($"Creating rom patch using {SelectedPatcher.FullPath} and {commandLineArgs}");
 
                 var proc = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = SelectedPatcher.Path,
+                        FileName = SelectedPatcher.FullPath,
                         Arguments = commandLineArgs,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
