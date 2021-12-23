@@ -83,23 +83,26 @@ namespace LaunchBoxRomPatchManager.DataAccess
                 DirectoryInfoHelper.CreateFolders();
 
                 // create a sample list 
-                List<Patcher> patchers = new List<Patcher>
+                List<Patcher> patchers = new List<Patcher>();
+                Patcher patcher = new Patcher
                 {
-                    new Patcher
-                    {
-                        Id = Guid.NewGuid().ToString(), 
-                        Name = "FLIPS", 
-                        Path = $"LaunchBoxRomPatchManager\\Patchers\\Floating\\flips.exe", 
-                        CommandLine = "{patch} {rom}"
-                    },
-                    new Patcher
-                    {
-                        Id = Guid.NewGuid().ToString(), 
-                        Name = "PPF-PDX", 
-                        Path = $"LaunchBoxRomPatchManager\\Patchers\\pdx-ppf3\\ppfbin\\applyppf\\w32\\ApplyPPF3.exe", 
-                        CommandLine = "a {rom} {patch}"
-                    }
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "FLIPS",
+                    Path = $"LaunchBoxRomPatchManager\\Patchers\\Floating\\flips.exe",
+                    CommandLine = "{patch} {rom}",
+                    Platforms = PatcherPlatformHelper.GetDefaultIpsPlatforms()
                 };
+                patchers.Add(patcher);
+
+                patcher = new Patcher
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "PPF-PDX",
+                    Path = $"LaunchBoxRomPatchManager\\Patchers\\pdx-ppf3\\ppfbin\\applyppf\\w32\\ApplyPPF3.exe",
+                    CommandLine = "a {rom} {patch}",
+                    Platforms = PatcherPlatformHelper.GetDefaultPpfPlatforms()
+                };
+                patchers.Add(patcher);
 
                 // save the file 
                 await SaveToFileAsync(patchers);
