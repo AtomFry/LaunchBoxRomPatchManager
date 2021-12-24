@@ -58,6 +58,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private string romFolderInWorkingDirectory;
         private SourceFile selectedSourceRomFile;
         private SourceFile selectedSourcePatchFile;
+        private SourceFile selectedSourceReadMeFile;
         private bool patchingInProgress;
 
         private IPlatform romHackPlatform;
@@ -91,6 +92,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private bool? romHackInstalled;
         private string romHackNotes;
         private string romHackLog;
+        private string readMeText;
 
         public ICommand SelectPatchFileCommand { get; }
         public ICommand SelectAllImagesCommand { get; }
@@ -146,6 +148,36 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
             // initialize rom hack properties from selected game
             InitializeRomHackProperties();
+        }
+
+        private void InitializeReadMe()
+        {
+            try
+            {
+                string originalFileName = SelectedSourceReadMeFile.SourceFilePath;
+                if(string.IsNullOrWhiteSpace(originalFileName))
+                {
+                    return;
+                }
+
+                string text = File.ReadAllText(originalFileName);
+                if(string.IsNullOrWhiteSpace(text))
+                {
+                    return;
+                }
+
+                if (originalFileName.ToLower().EndsWith(".rtf")
+                    || originalFileName.ToLower().EndsWith(".doc"))
+                {
+                    text = RtfHelper.StripRichTextFormat(text);
+                }
+
+                ReadMeText = text;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogException(ex, $"Attempting to load README from {SelectedSourceReadMeFile.SourceFilePath}");
+            }
         }
 
         private void InitializeWorkingDirectory()
@@ -970,6 +1002,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
                     {
                         SelectedSourcePatchFile = sourceFile;
                     }
+
+                    if (DirectoryInfoHelper.IsReadMeFile(patchFile))
+                    {
+                        SelectedSourceReadMeFile = sourceFile;
+                    }
                 }
             }
         }
@@ -1364,6 +1401,19 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        public SourceFile SelectedSourceReadMeFile
+        {
+            get { return selectedSourceReadMeFile; }
+            set
+            {
+                selectedSourceReadMeFile = value;
+                OnPropertyChanged("SelectedSourceReadMeFile");
+
+                // read the selected file and display in the ReadMe 
+                InitializeReadMe();
+            }
+        }
+
         public string CleanRomHackTitle
         {
             get { return cleanRomHackTitle; }
@@ -1541,6 +1591,16 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 romHackVisibility = value;
                 OnPropertyChanged("RomHackVisibility");
+            }
+        }
+
+        public string ReadMeText
+        {
+            get { return readMeText; }
+            set
+            {
+                readMeText = value;
+                OnPropertyChanged("ReadMeText");
             }
         }
 

@@ -56,12 +56,21 @@
         <Rectangle Grid.Row="1" Grid.Column="3" Fill="#4D4F61" Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         <Rectangle Grid.Row="1" Grid.Column="3" Fill="#3F404E" Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="1"/>
 
-        <StackPanel Name="RomHackPanel" Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding RomHackVisibility}">
-            <Border Height="35" Background="#2A2B34" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,10">
-                <TextBlock Text="Rom Hack" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+        <Grid Name="RomHackGrid" Grid.Row="1" Grid.Column="3"  Visibility="{Binding RomHackVisibility}"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Height="35" Background="#2A2B34" 
+                    HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5,5,5,10">
+                <TextBlock Text="Rom Hack" 
+                           HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
                            Background="#2A2B34" Foreground="#D3D3D5" />
             </Border>
-            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="3*"/>
@@ -81,12 +90,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
@@ -124,9 +128,23 @@
                           ItemsSource="{Binding PlatformLookup}" 
                           DisplayMemberPath="Name" 
                           SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}"/>
-            </Grid>
-        </StackPanel>
 
+                <Label Grid.Row="9" Grid.Column="0" Content="README file" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding SourcePatchFiles}" 
+                          DisplayMemberPath="SourceFileName" 
+                          SelectedItem="{Binding SelectedSourceReadMeFile, Mode=TwoWay}"/>
+
+                <Label Grid.Row="10" Grid.Column="0" Content="Read Me" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,2"/>
+                <ScrollViewer Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="10,2">
+                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                         TextWrapping="NoWrap"  TextAlignment="Left" 
+                         Text="{Binding ReadMeText}" 
+                         Background="#343542" Foreground="#D3D3D5"/>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
 
         <StackPanel Name="MetadataPanel" Grid.Row="1" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding MetadataVisibility}">
             <Border Height="35" Background="#2A2B34" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,10">
@@ -245,8 +263,9 @@
 
             <Border Grid.Row="0" Height="35" Background="#2A2B34" 
                     HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5,5,5,10">
-                <TextBlock Text="Notes" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
-                        Background="#2A2B34" Foreground="#D3D3D5" />
+                <TextBlock Text="Notes" 
+                           HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" 
+                           Background="#2A2B34" Foreground="#D3D3D5" />
             </Border>
             <TextBox Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,5"
                        TextWrapping="Wrap" TextAlignment="Left" VerticalContentAlignment="Top" HorizontalContentAlignment="Left"

@@ -374,5 +374,17 @@ namespace LaunchBoxRomPatchManager.Helpers
                 }
             }
         }
+
+        internal static bool IsReadMeFile(string fileNameWithExtension)
+        {
+            string fileToCheck = fileNameWithExtension.ToLower();
+
+            if (fileToCheck.EndsWith(".txt")) return true;
+            if (fileToCheck.EndsWith(".md")) return true;
+            if (fileToCheck.EndsWith(".rtf")) return true;
+            if (fileToCheck.EndsWith(".doc")) return true;
+
+            return false;
+        }
     }
 }
