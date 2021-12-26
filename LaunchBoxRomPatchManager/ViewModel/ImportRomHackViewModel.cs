@@ -40,9 +40,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
         public ObservableCollection<VideoToCopy> VideosToCopy { get; }
         public ObservableCollection<AdditionalAppToCopy> AdditionalAppsToCopy { get; }
         public ObservableCollection<IPlatform> PlatformLookup { get; }
+        public ObservableCollection<IEmulator> EmulatorLookup { get; }
         public ObservableCollection<string> TabPages { get; }
         public ObservableCollection<SourceFile> SourceRomFiles { get; }
         public ObservableCollection<SourceFile> SourcePatchFiles { get; }
+        public ObservableCollection<Patcher> PatcherLookup { get; }
 
         private IGame selectedGame;
         private ImageToCopy selectedImageToCopy;
@@ -60,7 +62,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private SourceFile selectedSourcePatchFile;
         private SourceFile selectedSourceReadMeFile;
         private bool patchingInProgress;
+        private string readMeText;
 
+        private IEmulator romHackEmulator;
         private IPlatform romHackPlatform;
         private string romHackTitle;
         private string cleanRomHackTitle;
@@ -78,6 +82,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private string romHackPublisher;
         private string romHackStatus;
         private string romHackSource;
+        private string romHackCommandLine;
         private DateTime? romHackDateAdded;
         private string romHackWikipediaUrl;
         private string romHackVideoUrl;
@@ -92,7 +97,15 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private bool? romHackInstalled;
         private string romHackNotes;
         private string romHackLog;
-        private string readMeText;
+        private string romHackManualPath;
+        private string romHackMusicPath;
+        private bool romHackOverrideDefaultStartupScreenSettings;
+        private bool romHackUseStartupScreen;
+        private bool romHackDisableShutdownScreen;
+        private bool romHackHideMouseCursorInGame;
+        private bool romHackAggressiveWindowHiding;
+        private bool romHackHideAllNonExclusiveFullScreenWindows;
+        private double romHackStartupLoadDelay;
 
         public ICommand SelectPatchFileCommand { get; }
         public ICommand SelectAllImagesCommand { get; }
@@ -115,8 +128,10 @@ namespace LaunchBoxRomPatchManager.ViewModel
             VideosToCopy = new ObservableCollection<VideoToCopy>();
             AdditionalAppsToCopy = new ObservableCollection<AdditionalAppToCopy>();
             PlatformLookup = new ObservableCollection<IPlatform>();
+            EmulatorLookup = new ObservableCollection<IEmulator>();
             SourceRomFiles = new ObservableCollection<SourceFile>();
             SourcePatchFiles = new ObservableCollection<SourceFile>();
+            PatcherLookup = new ObservableCollection<Patcher>();
 
             SelectPatchFileCommand = new DelegateCommand(OnSelectPatchFileExecute);
             SelectAllImagesCommand = new DelegateCommand(OnSelectAllImagesExecute);
@@ -137,32 +152,47 @@ namespace LaunchBoxRomPatchManager.ViewModel
             // create the available tabs
             InitializeTabPages();
 
-            // initialize the patcher to use from the selected game
-            await InitializePatcherAsync();
-
             // populate the platform lookup
             InitializePlatformLookup();
+
+            // populate the emulator lookup
+            InitializeEmulatorLookup();
+
+            // populate the patcher lookup 
+            await InitializePatcherLookupAsync();
 
             // initialize source rom files from selected game's application path 
             InitializeSourceRomFiles();
 
             // initialize rom hack properties from selected game
             InitializeRomHackProperties();
+
+            // prompt for patch file
+            OnSelectPatchFileExecute();
         }
+
 
         private void InitializeReadMe()
         {
             try
             {
+                if(SelectedSourceReadMeFile == null)
+                {
+                    ReadMeText = String.Empty;
+                    return;
+                }
+
                 string originalFileName = SelectedSourceReadMeFile.SourceFilePath;
                 if(string.IsNullOrWhiteSpace(originalFileName))
                 {
+                    ReadMeText = String.Empty;
                     return;
                 }
 
                 string text = File.ReadAllText(originalFileName);
                 if(string.IsNullOrWhiteSpace(text))
                 {
+                    ReadMeText = String.Empty;
                     return;
                 }
 
@@ -217,24 +247,25 @@ namespace LaunchBoxRomPatchManager.ViewModel
             TabPages.Add("Log");
         }
 
-        private async Task InitializePatcherAsync()
+        private void InitializePatcherAsync()
         {
-            // get all patchers from the data file
-            PatcherDataProvider patcherDataProvider = new PatcherDataProvider();
-            IEnumerable<Patcher> patchers = await patcherDataProvider.GetAllPatchersAsync();
-
-            // find the patcher that has this platform assigned
-            foreach (Patcher patcher in patchers)
+            var query = PatcherLookup.Where(p => p.Platforms.Contains(SelectedGame.Platform));
+            if(query.Any())
             {
-                foreach (string platform in patcher.Platforms)
-                {
-                    if (platform == SelectedGame.Platform)
-                    {
-                        SelectedPatcher = patcher;
-                        break;
-                    }
-                }
+                SelectedPatcher = query.FirstOrDefault();
             }
+        }
+
+        private async Task InitializePatcherLookupAsync()
+        {
+            IEnumerable<Patcher> patchers = await DataAccess.PatcherDataService.Instance.GetAllPatchersAsync();
+            foreach(Patcher patcher in patchers)
+            {
+                PatcherLookup.Add(patcher);
+            }
+
+            // initialize the patcher to use from the selected game
+            InitializePatcherAsync();
         }
 
         private void InitializePlatformLookup()
@@ -246,11 +277,22 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        private void InitializeEmulatorLookup()
+        {
+            IEmulator[] emulators = PluginHelper.DataManager.GetAllEmulators().OrderBy(e => e.Title).ToArray();
+            foreach(IEmulator emulator in emulators)
+            {
+                EmulatorLookup.Add(emulator);
+            }
+        }
+
         private void InitializeRomHackProperties()
         {
             RomHackTitle = SelectedGame.Title;
             RomHackSortTitle = SelectedGame.SortTitle;
             RomHackPlatform = PlatformLookup.FirstOrDefault(p => p.Name == SelectedGame.Platform);
+            RomHackEmulator = EmulatorLookup.FirstOrDefault(e => e.Id == SelectedGame.EmulatorId);
+            RomHackCommandLine = SelectedGame.CommandLine;
             RomHackReleaseDate = SelectedGame.ReleaseDate;
             RomHackRating = SelectedGame.Rating;
             RomHackReleaseType = SelectedGame.ReleaseType;
@@ -277,9 +319,19 @@ namespace LaunchBoxRomPatchManager.ViewModel
             RomHackHide = SelectedGame.Hide;
             RomHackBroken = SelectedGame.Broken;
             RomHackInstalled = SelectedGame.Installed;
+            RomHackManualPath = SelectedGame.ManualPath;
+            RomHackMusicPath = SelectedGame.MusicPath;
+            RomHackOverrideDefaultStartupScreenSettings = SelectedGame.OverrideDefaultStartupScreenSettings;
+            RomHackUseStartupScreen = SelectedGame.UseStartupScreen;
+            RomHackHideMouseCursorInGame = SelectedGame.HideMouseCursorInGame;
+            RomHackAggressiveWindowHiding = SelectedGame.AggressiveWindowHiding;
+            RomHackHideAllNonExclusiveFullScreenWindows = SelectedGame.HideAllNonExclusiveFullscreenWindows;
+            RomHackStartupLoadDelay = SelectedGame.StartupLoadDelay / 1000.0;
+            RomHackDisableShutdownScreen = SelectedGame.DisableShutdownScreen;
 
-            // Get the list of images from the selected game
-            InitializeImagesToCopy();
+
+        // Get the list of images from the selected game
+        InitializeImagesToCopy();
 
             // Get the list of videos from the selected game
             InitializeVideosToCopy();
@@ -495,31 +547,36 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
                     // todo: metadata - controller support 
 
-                    // todo: media
-                    // newGame.ManualPath = SelectedGame.ManualPath;
-                    // newGame.MusicPath = SelectedGame.MusicPath;
-
+                    // media
+                    newGame.ManualPath = RomHackManualPath;
+                    newGame.MusicPath = RomHackMusicPath;
+                    
                     // media - images 
                     // media - videos
 
                     // launching 
                     newGame.ApplicationPath = patchedRomFilePath;
 
-                    // newGame.CommandLine = SelectedGame.CommandLine;
-                    // newGame.ConfigurationPath = SelectedGame.ConfigurationPath;
-                    // newGame.ConfigurationCommandLine = SelectedGame.ConfigurationCommandLine;
+                    // launching - emulation
+                    newGame.EmulatorId = RomHackEmulator.Id;
+                    newGame.CommandLine = RomHackCommandLine;
 
-                    // todo: launching - emulation
-                    newGame.EmulatorId = SelectedGame.EmulatorId;
+                    // launching - startup
+                    newGame.OverrideDefaultStartupScreenSettings = RomHackOverrideDefaultStartupScreenSettings;
+                    if(newGame.OverrideDefaultStartupScreenSettings)
+                    {
+                        newGame.UseStartupScreen = RomHackUseStartupScreen;
+                        if(newGame.UseStartupScreen)
+                        {
+                            newGame.DisableShutdownScreen = RomHackDisableShutdownScreen;
+                            newGame.HideMouseCursorInGame = RomHackHideMouseCursorInGame;
+                            newGame.AggressiveWindowHiding = RomHackAggressiveWindowHiding;
+                            newGame.HideAllNonExclusiveFullscreenWindows = RomHackHideAllNonExclusiveFullScreenWindows;
+                            newGame.StartupLoadDelay = (int)(RomHackStartupLoadDelay * 1000);
+                        }
+                    }
 
-                    // todo: launching - startup/pause 
-                    newGame.OverrideDefaultStartupScreenSettings = SelectedGame.OverrideDefaultStartupScreenSettings;
-                    newGame.UseStartupScreen = selectedGame.UseStartupScreen;
-                    newGame.DisableShutdownScreen = SelectedGame.DisableShutdownScreen;
-                    newGame.HideMouseCursorInGame = SelectedGame.HideMouseCursorInGame;
-                    newGame.AggressiveWindowHiding = SelectedGame.AggressiveWindowHiding;
-                    newGame.HideAllNonExclusiveFullscreenWindows = SelectedGame.HideAllNonExclusiveFullscreenWindows;
-                    newGame.StartupLoadDelay = selectedGame.StartupLoadDelay;
+                    // todo: launching - pause 
                 }
                 catch (Exception ex)
                 {
@@ -993,17 +1050,19 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
                 SourcePatchFiles.Clear();
 
+                SelectedSourcePatchFile = null;
+                SelectedSourceReadMeFile = null;
                 IEnumerable<string> patchFiles = Directory.EnumerateFiles(patchFolderInWorkingDirectory, "*", SearchOption.AllDirectories);
                 foreach (string patchFile in patchFiles)
                 {
                     SourceFile sourceFile = new SourceFile(patchFile);
                     SourcePatchFiles.Add(sourceFile);
-                    if (DirectoryInfoHelper.IsPatchFile(patchFile))
+                    if (SelectedSourcePatchFile == null && DirectoryInfoHelper.IsPatchFile(patchFile))
                     {
                         SelectedSourcePatchFile = sourceFile;
                     }
 
-                    if (DirectoryInfoHelper.IsReadMeFile(patchFile))
+                    if (SelectedSourceReadMeFile == null && DirectoryInfoHelper.IsReadMeFile(patchFile))
                     {
                         SelectedSourceReadMeFile = sourceFile;
                     }
@@ -1080,6 +1139,26 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 romHackPlatform = value;
                 OnPropertyChanged("RomHackPlatform");
+            }
+        }
+
+        public IEmulator RomHackEmulator
+        {
+            get { return romHackEmulator; }
+            set
+            {
+                romHackEmulator = value;
+                OnPropertyChanged("RomHackEmulator");
+            }
+        }
+
+        public string RomHackCommandLine
+        {
+            get { return romHackCommandLine; }
+            set
+            {
+                romHackCommandLine = value;
+                OnPropertyChanged("RomHackCommandLine");
             }
         }
 
@@ -1381,6 +1460,95 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        public string RomHackManualPath
+        { 
+            get { return romHackManualPath; }
+            set
+            {
+                romHackManualPath = value;
+                OnPropertyChanged("RomHackManualPath");
+            }
+        }
+
+        public string RomHackMusicPath
+        {
+            get { return romHackMusicPath; }
+            set
+            {
+                romHackMusicPath = value;
+                OnPropertyChanged("RomHackMusicPath");
+            }
+        }
+
+        public bool RomHackOverrideDefaultStartupScreenSettings
+        {
+            get { return romHackOverrideDefaultStartupScreenSettings; }
+            set
+            {
+                romHackOverrideDefaultStartupScreenSettings = value;
+                OnPropertyChanged("RomHackOverrideDefaultStartupScreenSettings");
+
+                if(!romHackOverrideDefaultStartupScreenSettings)
+                {
+                    RomHackUseStartupScreen = false;
+                }
+            }
+        }
+        public bool RomHackUseStartupScreen
+        {
+            get { return romHackUseStartupScreen; }
+            set
+            {
+                romHackUseStartupScreen = value;
+                OnPropertyChanged("RomHackUseStartupScreen");
+            }
+        }
+        public bool RomHackHideMouseCursorInGame
+        {
+            get { return romHackHideMouseCursorInGame; }
+            set
+            {
+                romHackHideMouseCursorInGame = value;
+                OnPropertyChanged("RomHackHideMouseCursorInGame");
+            }
+        }
+        public bool RomHackAggressiveWindowHiding
+        {
+            get { return romHackAggressiveWindowHiding; }
+            set
+            {
+                romHackAggressiveWindowHiding = value;
+                OnPropertyChanged("RomHackAggressiveWindowHiding");
+            }
+        }
+        public bool RomHackHideAllNonExclusiveFullScreenWindows
+        {
+            get { return romHackHideAllNonExclusiveFullScreenWindows; }
+            set
+            {
+                romHackHideAllNonExclusiveFullScreenWindows = value;
+                OnPropertyChanged("RomHackHideAllNonExclusiveFullScreenWindows");
+            }
+        }
+        public double RomHackStartupLoadDelay
+        {
+            get { return romHackStartupLoadDelay; }
+            set
+            {
+                romHackStartupLoadDelay = value;
+                OnPropertyChanged("RomHackStartupLoadDelay");
+            }
+        }
+        public bool RomHackDisableShutdownScreen
+        {
+            get { return romHackDisableShutdownScreen; }
+            set
+            {
+                romHackDisableShutdownScreen = value;
+                OnPropertyChanged("RomHackDisableShutdownScreen");
+            }
+        }
+
         public SourceFile SelectedSourceRomFile
         {
             get { return selectedSourceRomFile; }
@@ -1605,6 +1773,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         }
 
         public Uri IconUri { get; } = ResourceImages.RomHackingIconPath;
+
 
         private void InvalidateCommands()
         {

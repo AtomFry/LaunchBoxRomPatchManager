@@ -23,11 +23,15 @@
                     AutoGenerateColumns="False" 
                     IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" 
                     RowHeaderWidth="0">
+            <DataGrid.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditCommand}"/>
+            </DataGrid.InputBindings>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}"/>
                 <DataGridTextColumn Header="Path" Width="*" Binding="{Binding Path}"/>
                 <DataGridTextColumn Header="CommandLine" Width="*" Binding="{Binding CommandLine}"/>
             </DataGrid.Columns>
+            
         </DataGrid>
         <Grid Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
