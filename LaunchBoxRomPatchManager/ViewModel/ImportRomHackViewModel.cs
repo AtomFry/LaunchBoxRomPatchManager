@@ -560,6 +560,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
                     newGame.GenresString = RomHackGenreString;
                     newGame.Platform = RomHackPlatform.Name;
                     newGame.Developer = RomHackDeveloper;
+                    newGame.Publisher = RomHackPublisher;
                     newGame.Series = RomHackSeries;
                     newGame.Region = RomHackRegion;
                     newGame.PlayMode = RomHackPlayMode;
