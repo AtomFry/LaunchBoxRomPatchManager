@@ -35,22 +35,26 @@
         <Label Grid.Row="6" Content="Command line" Margin="10 0"/>
         <TextBox Grid.Row="7" Text="{Binding PatcherCommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"/>
 
-        <Label Grid.Row="8" Content="Platforms" Margin="10 0"/>
-
         <Grid Grid.Row="9" Margin="10 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ListBox Grid.Column="0" SelectionMode="Single"
+            <Label Grid.Row="0" Grid.Column="0" Content="Selected Platforms" HorizontalAlignment="Center"/>
+            <Label Grid.Row="0" Grid.Column="2" Content="Available Platforms" HorizontalAlignment="Center"/>
+            <ListBox Grid.Row="1" Grid.Column="0" SelectionMode="Single"
                      ItemsSource="{Binding PatcherPlatforms}"
                      SelectedItem="{Binding SelectedPatcherPlatform, Mode=TwoWay}"/>
-            <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                 <Button Content="&lt;" Width="40" Margin="5" Command="{Binding AddPlatformCommand}"/>
                 <Button Content="&gt;" Width="40" Margin="5" Command="{Binding RemovePlatformCommand}"/>
             </StackPanel>
-            <ListBox Grid.Column="2" SelectionMode="Single"
+            <ListBox Grid.Row="1" Grid.Column="2" SelectionMode="Single"
                      ItemsSource="{Binding RemainingPlatforms}" 
                      SelectedItem="{Binding SelectedRemainingPlatform, Mode=TwoWay}"/>
         </Grid>

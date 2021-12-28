@@ -68,15 +68,15 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 }
             }
 
-            PatcherPlatforms.CollectionChanged += PatcherPlatforms_CollectionChanged;
+            PatcherPlatforms.CollectionChanged += PatcherPlatforms_CollectionChanged;            
         }
 
         private void OnRemovePatcherPlatformExecute()
         {
             if(SelectedPatcherPlatform != null)
-            {
+            {                
+                RemainingPlatforms.Add(SelectedPatcherPlatform);
                 PatcherPlatforms.Remove(SelectedPatcherPlatform);
-                OnPropertyChanged("PatcherPlatforms");
 
                 // unselect the patcher platform 
                 SelectedPatcherPlatform = null;
@@ -88,8 +88,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
         {
             if(SelectedRemainingPlatform != null)
             {
-                PatcherPlatforms.Add(SelectedRemainingPlatform);
-                OnPropertyChanged("PatcherPlatforms");
+                PatcherPlatforms.Add(SelectedRemainingPlatform);                
+                RemainingPlatforms.Remove(SelectedRemainingPlatform);                
 
                 // unselect the remaining patcher platform 
                 SelectedRemainingPlatform = null;
