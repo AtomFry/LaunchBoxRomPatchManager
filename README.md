@@ -39,3 +39,7 @@ Select the platforms that the patcher can be used with
 
 ## Importing a ROM Hack
 The plug-in includes a menu item called "Import ROM Hack" when you right click on a game.  To import a rom hack, right click on a game and select "Import ROM Hack".  A file dialog will open prompting to select a patch file.  Select the file that contains the patch file.  The "Import rom hack" screen will be displayed with information about the selected game and selected patch file.  Enter values for the imported ROM hack as desired and click OK.  The plug-in will make a copy of the source game, extract files as needed, apply the selected patch file to the source ROM file, and import the game into your LaunchBox library.   
+
+# Special Thanks
+- Thank you to Alcano for the amazing Floating IPS which the plug-in uses to apply IPS patches via command line
+- Thank you to Icarus of Paradox for the amazing Paradox PPF which the plug-in uses to apply PPF patches via command line
