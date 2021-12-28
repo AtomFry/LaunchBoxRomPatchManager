@@ -142,6 +142,32 @@ namespace LaunchBoxRomPatchManager.Helpers
             }
         }
 
+        private string launchBoxMetadataFile;
+        public string LaunchBoxMetadataFile
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(launchBoxMetadataFile))
+                {
+                    launchBoxMetadataFile = $"{ApplicationPath}\\Metadata\\Metadata.xml";
+                }
+                return launchBoxMetadataFile;
+            }
+        }
+
+        private string pluginMetadataFile;
+        public string PluginMetadataFile
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(pluginMetadataFile))
+                {
+                    pluginMetadataFile = $"{ RomPatcherDataFolderPath}\\RomHackMetadata.json";
+                }
+                return pluginMetadataFile;
+            }
+        }
+
         private string pluginTempFolder;
         public string PluginTempFolder
         {

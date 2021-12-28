@@ -1,4 +1,5 @@
-﻿using LaunchBoxRomPatchManager.DataProvider;
+﻿using LaunchBoxRomPatchManager.DataAccess;
+using LaunchBoxRomPatchManager.DataProvider;
 using LaunchBoxRomPatchManager.EmbeddedResources;
 using LaunchBoxRomPatchManager.Event;
 using LaunchBoxRomPatchManager.Helpers;
@@ -45,6 +46,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         public ObservableCollection<SourceFile> SourceRomFiles { get; }
         public ObservableCollection<SourceFile> SourcePatchFiles { get; }
         public ObservableCollection<Patcher> PatcherLookup { get; }
+        public ObservableCollection<MetadataGame> LaunchBoxMetadataLookup { get; }
 
         private IGame selectedGame;
         private ImageToCopy selectedImageToCopy;
@@ -63,7 +65,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
         private SourceFile selectedSourceReadMeFile;
         private bool patchingInProgress;
         private string readMeText;
+        private MetadataGame selectedLaunchBoxMetadataGame;
+        private bool openMetadataComboBox;
+        private IEnumerable<MetadataGame> MetadataGames;
 
+        private int? romHackDatabaseId;
         private IEmulator romHackEmulator;
         private IPlatform romHackPlatform;
         private string romHackTitle;
@@ -116,6 +122,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
         public ICommand SelectNoAdditionalAppsCommand { get; }
         public ICommand CreateRomHackCommand { get; }
         public ICommand CancelCommand { get; }
+        public ICommand MetadataSearchCommand { get; }
 
         public ImportRomHackViewModel(IGame _selectedGame)
         {
@@ -132,6 +139,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
             SourceRomFiles = new ObservableCollection<SourceFile>();
             SourcePatchFiles = new ObservableCollection<SourceFile>();
             PatcherLookup = new ObservableCollection<Patcher>();
+            LaunchBoxMetadataLookup = new ObservableCollection<MetadataGame>();
 
             SelectPatchFileCommand = new DelegateCommand(OnSelectPatchFileExecute);
             SelectAllImagesCommand = new DelegateCommand(OnSelectAllImagesExecute);
@@ -142,6 +150,26 @@ namespace LaunchBoxRomPatchManager.ViewModel
             SelectNoAdditionalAppsCommand = new DelegateCommand(OnSelectNoAdditionalAppsExecute);
             CreateRomHackCommand = new DelegateCommand(OnCreateRomHackExecuteAsync, CanCreateRomHackExecute);
             CancelCommand = new DelegateCommand(OnCancelExecute);
+            MetadataSearchCommand = new DelegateCommand(OnMetadataSearchExecute);
+        }
+
+        private void OnMetadataSearchExecute()
+        {
+            LaunchBoxMetadataLookup.Clear();
+
+            var query = MetadataGames.Where(g =>
+                g.Platform == RomHackPlatform.Name &&
+                g.Name.ToLower().Contains(RomHackTitle.ToLower())).OrderBy(g => g.Name);
+
+            if(query.Any())
+            {
+                foreach (MetadataGame game in query)
+                {
+                    LaunchBoxMetadataLookup.Add(game);
+                }
+
+                OpenMetadataComboBox = true;
+            }
         }
 
         public async void LoadAsync()
@@ -158,6 +186,9 @@ namespace LaunchBoxRomPatchManager.ViewModel
             // populate the emulator lookup
             InitializeEmulatorLookup();
 
+            // todo: populate this by searching based on the rom hack title instead of just bringing in all games 
+            await InitializeMetadataLookup();
+
             // populate the patcher lookup 
             await InitializePatcherLookupAsync();
 
@@ -171,6 +202,10 @@ namespace LaunchBoxRomPatchManager.ViewModel
             OnSelectPatchFileExecute();
         }
 
+        private async Task InitializeMetadataLookup()
+        {
+            MetadataGames = await LaunchBoxMetadataService.Instance.GetRomHackMetadataAsync();
+        }
 
         private void InitializeReadMe()
         {
@@ -218,6 +253,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
             // make sure temp folder exists 
             string pluginTempFolder = DirectoryInfoHelper.Instance.PluginTempFolder;
+            if(Directory.Exists(pluginTempFolder))
+            {
+                Directory.Delete(pluginTempFolder, true);
+            }
+
             DirectoryInfoHelper.CreateDirectoryIfNotExists(pluginTempFolder);
 
             // create a new unique folder to work out of in the temp directory
@@ -258,7 +298,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
 
         private async Task InitializePatcherLookupAsync()
         {
-            IEnumerable<Patcher> patchers = await DataAccess.PatcherDataService.Instance.GetAllPatchersAsync();
+            IEnumerable<Patcher> patchers = await PatcherDataService.Instance.GetAllPatchersAsync();
             foreach(Patcher patcher in patchers)
             {
                 PatcherLookup.Add(patcher);
@@ -329,9 +369,8 @@ namespace LaunchBoxRomPatchManager.ViewModel
             RomHackStartupLoadDelay = SelectedGame.StartupLoadDelay / 1000.0;
             RomHackDisableShutdownScreen = SelectedGame.DisableShutdownScreen;
 
-
-        // Get the list of images from the selected game
-        InitializeImagesToCopy();
+            // Get the list of images from the selected game
+            InitializeImagesToCopy();
 
             // Get the list of videos from the selected game
             InitializeVideosToCopy();
@@ -511,6 +550,7 @@ namespace LaunchBoxRomPatchManager.ViewModel
                     AddRomHackLogMessage($"Creating {RomHackTitle}");
 
                     // metadata
+                    newGame.LaunchBoxDbId = RomHackDatabaseId;
                     newGame.Title = RomHackTitle;
                     newGame.LaunchBoxDbId = null;   // todo: look into how we can set the dbid
                     newGame.ReleaseDate = RomHackReleaseDate;
@@ -1549,6 +1589,16 @@ namespace LaunchBoxRomPatchManager.ViewModel
             }
         }
 
+        public int? RomHackDatabaseId
+        {
+            get { return romHackDatabaseId; }
+            set
+            {
+                romHackDatabaseId = value;
+                OnPropertyChanged("RomHackDatabaseId");
+            }
+        }
+
         public SourceFile SelectedSourceRomFile
         {
             get { return selectedSourceRomFile; }
@@ -1580,6 +1630,36 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 // read the selected file and display in the ReadMe 
                 InitializeReadMe();
             }
+        }
+
+        public MetadataGame SelectedLaunchBoxMetadataGame
+        {
+            get { return selectedLaunchBoxMetadataGame; }
+            set
+            {
+                selectedLaunchBoxMetadataGame = value;
+                OnPropertyChanged("SelectedLaunchBoxMetadataGame");
+
+                InitializeFromLauncBoxMetadataGame();
+            }
+        }
+
+        private void InitializeFromLauncBoxMetadataGame()
+        {
+            if(SelectedLaunchBoxMetadataGame == null)
+            {
+                return;
+            }
+
+            RomHackDatabaseId = SelectedLaunchBoxMetadataGame.DatabaseID;
+            RomHackTitle = SelectedLaunchBoxMetadataGame.Name;
+            RomHackReleaseDate = SelectedLaunchBoxMetadataGame.ReleaseDate;
+            RomHackNotes = SelectedLaunchBoxMetadataGame.Overview;
+            RomHackMaxPlayers = SelectedLaunchBoxMetadataGame.MaxPlayers;
+            RomHackVideoUrl = SelectedLaunchBoxMetadataGame.VideoURL;
+            RomHackGenreString = SelectedLaunchBoxMetadataGame.Genres;
+            RomHackDeveloper = SelectedLaunchBoxMetadataGame.Developer;
+            RomHackPublisher = SelectedLaunchBoxMetadataGame.Publisher;
         }
 
         public string CleanRomHackTitle
@@ -1771,6 +1851,17 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 OnPropertyChanged("ReadMeText");
             }
         }
+
+        public bool OpenMetadataComboBox
+        {
+            get { return openMetadataComboBox; }
+            set
+            {
+                openMetadataComboBox = value;
+                OnPropertyChanged("OpenMetadataComboBox");
+            }
+        }
+
 
         public Uri IconUri { get; } = ResourceImages.RomHackingIconPath;
 

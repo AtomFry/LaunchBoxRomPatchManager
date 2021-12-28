@@ -91,64 +91,65 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Content="Patcher" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                          Background="#343542" Foreground="#D3D3D5"
-                          ItemsSource="{Binding PatcherLookup}" 
+                <Label Grid.Row="0" Grid.Column="0" Content="Title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Panel.ZIndex="200" 
+                         Text="{Binding RomHackTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                         Margin="10,2,5,2" Background="#343542" Foreground="#D3D3D5"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Panel.ZIndex="100" Margin="10,2,5,2" Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding LaunchBoxMetadataLookup}" 
                           DisplayMemberPath="Name" 
-                          SelectedItem="{Binding SelectedPatcher, Mode=TwoWay}"/>
-                
-                <Label Grid.Row="1" Grid.Column="0" Content="Patching" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.Title}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.ApplicationPath}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
-                <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                          Background="#343542" Foreground="#D3D3D5"
-                          ItemsSource="{Binding SourceRomFiles}" 
-                          DisplayMemberPath="SourceFileName" 
-                          SelectedItem="{Binding SelectedSourceRomFile, Mode=TwoWay}"/>
+                          IsDropDownOpen="{Binding OpenMetadataComboBox, Mode=TwoWay}"
+                          SelectedItem="{Binding SelectedLaunchBoxMetadataGame, Mode=TwoWay}"/>
+                <Button Grid.Row="0" Grid.Column="6" Margin="0,2,10,2" Content="Search" Background="#343542" Foreground="#D3D3D5" Command="{Binding MetadataSearchCommand}"/>
 
-                <Label Grid.Row="4" Grid.Column="0" Content="Patch" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
-                <Button Grid.Row="4" Grid.Column="5"  Content="..." HorizontalAlignment="Right" VerticalAlignment="Stretch" Command="{Binding SelectPatchFileCommand}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
-
-                <Label Grid.Row="5" Grid.Column="0" Content="Patch to apply" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <ComboBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                <Label Grid.Row="1" Grid.Column="0" Content="Patch" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedPatchFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Button Grid.Row="1" Grid.Column="5"  Content="..." HorizontalAlignment="Right" VerticalAlignment="Stretch" Command="{Binding SelectPatchFileCommand}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                           Background="#343542" Foreground="#D3D3D5"
                           ItemsSource="{Binding SourcePatchFiles}" 
                           DisplayMemberPath="SourceFileName" 
                           SelectedItem="{Binding SelectedSourcePatchFile, Mode=TwoWay}"/>
 
-                <Label Grid.Row="6" Grid.Column="0" Content="Title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="3" Grid.Column="0" Content="Patching" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.Title}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding SelectedGame.ApplicationPath}" IsReadOnly="True" Margin="10,2" Background="#343542" Foreground="#779ED3"/>
+                <ComboBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding SourceRomFiles}" 
+                          DisplayMemberPath="SourceFileName" 
+                          SelectedItem="{Binding SelectedSourceRomFile, Mode=TwoWay}"/>
 
-                <Label Grid.Row="7" Grid.Column="0" Content="Sort title" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding RomHackSortTitle, Mode=TwoWay}" Margin="10,2" Background="#343542" Foreground="#D3D3D5"/>
+                <Label Grid.Row="6" Grid.Column="0" Content="Patcher" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          Background="#343542" Foreground="#D3D3D5"
+                          ItemsSource="{Binding PatcherLookup}" 
+                          DisplayMemberPath="Name" 
+                          SelectedItem="{Binding SelectedPatcher, Mode=TwoWay}"/>
 
-                <Label Grid.Row="8" Grid.Column="0" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <ComboBox Grid.Row="8" Grid.Column="1" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
+                <Label Grid.Row="7" Grid.Column="0" Content="Platform" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="7" Grid.Column="1" Margin="10,2" Background="#343542" Foreground="#D3D3D5"
                           ItemsSource="{Binding PlatformLookup}" 
                           DisplayMemberPath="Name" 
                           SelectedItem="{Binding RomHackPlatform, Mode=TwoWay}"/>
 
-                <Label Grid.Row="9" Grid.Column="0" Content="README file" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
-                <ComboBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                <Label Grid.Row="8" Grid.Column="0" Content="README" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,2"/>
+                <ComboBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                           Background="#343542" Foreground="#D3D3D5"
                           ItemsSource="{Binding SourcePatchFiles}" 
                           DisplayMemberPath="SourceFileName" 
                           SelectedItem="{Binding SelectedSourceReadMeFile, Mode=TwoWay}"/>
-
-                <Label Grid.Row="10" Grid.Column="0" Content="Read Me" Foreground="#D3D3D5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,2"/>
-                <ScrollViewer Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="10,2">
-                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                         TextWrapping="NoWrap"  TextAlignment="Left" 
-                         Text="{Binding ReadMeText}" 
+                
+                <TextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="5" Margin="10,2"
+                         ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                         TextWrapping="Wrap"  TextAlignment="Left" 
+                         BorderThickness="0"
+                         Text="{Binding ReadMeText, Mode=OneWay}"                                
                          Background="#343542" Foreground="#D3D3D5"/>
-                </ScrollViewer>
             </Grid>
         </Grid>
 
@@ -275,7 +276,7 @@
             </Border>
             <TextBox Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,0,5,5"
                        TextWrapping="Wrap" TextAlignment="Left" VerticalContentAlignment="Top" HorizontalContentAlignment="Left"
-                       Text="{Binding RomHackNotes, Mode=TwoWay}" 
+                       Text="{Binding RomHackNotes, Mode=TwoWay}" AcceptsReturn="True"
                        Background="#343542" Foreground="#D3D3D5"/>
         </Grid>
 
@@ -479,28 +480,6 @@
             </Grid>
         </Grid>
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-
-
-
-
-
-
-
-
-
-
-
         <Grid Name="StartupPauseGrid" Grid.Row="1" Grid.Column="3"  Visibility="{Binding StartupPauseVisibility}"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
@@ -609,29 +588,6 @@
 
             </Grid>
         </Grid>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         <Grid Name="LogGrid" Margin="10,2" Grid.Row="1" Grid.Column="3"  Visibility="{Binding LogVisibility}"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
