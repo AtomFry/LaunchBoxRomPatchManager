@@ -153,25 +153,6 @@ namespace LaunchBoxRomPatchManager.ViewModel
             MetadataSearchCommand = new DelegateCommand(OnMetadataSearchExecute);
         }
 
-        private void OnMetadataSearchExecute()
-        {
-            LaunchBoxMetadataLookup.Clear();
-
-            var query = MetadataGames.Where(g =>
-                g.Platform == RomHackPlatform.Name &&
-                g.Name.ToLower().Contains(RomHackTitle.ToLower())).OrderBy(g => g.Name);
-
-            if(query.Any())
-            {
-                foreach (MetadataGame game in query)
-                {
-                    LaunchBoxMetadataLookup.Add(game);
-                }
-
-                OpenMetadataComboBox = true;
-            }
-        }
-
         public async void LoadAsync()
         {
             // creates a temp folder to work out of
@@ -213,21 +194,21 @@ namespace LaunchBoxRomPatchManager.ViewModel
             {
                 if(SelectedSourceReadMeFile == null)
                 {
-                    ReadMeText = String.Empty;
+                    ReadMeText = string.Empty;
                     return;
                 }
 
                 string originalFileName = SelectedSourceReadMeFile.SourceFilePath;
                 if(string.IsNullOrWhiteSpace(originalFileName))
                 {
-                    ReadMeText = String.Empty;
+                    ReadMeText = string.Empty;
                     return;
                 }
 
                 string text = File.ReadAllText(originalFileName);
                 if(string.IsNullOrWhiteSpace(text))
                 {
-                    ReadMeText = String.Empty;
+                    ReadMeText = string.Empty;
                     return;
                 }
 
@@ -476,6 +457,35 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 {
                     SelectedSourceRomFile = sourceFile;
                 }
+            }
+        }
+
+        private void OnMetadataSearchExecute()
+        {
+            LaunchBoxMetadataLookup.Clear();
+
+            var query = MetadataGames.Where(g => g.Platform == RomHackPlatform.Name && g.Name.ToLower().Contains(RomHackTitle.ToLower()));
+
+            if (!query.Any())
+            {
+                query = MetadataGames.Where(g => g.Name.ToLower().Contains(RomHackTitle.ToLower()));
+            }
+
+            if (!query.Any())
+            {
+                query = MetadataGames.Where(g => g.Platform == RomHackPlatform.Name);
+            }
+
+            query = query.OrderBy(g => SearchHelper.Compute(RomHackTitle.ToLower(), g.Name.ToLower()));
+
+            if (query.Any())
+            {
+                foreach (MetadataGame game in query)
+                {
+                    LaunchBoxMetadataLookup.Add(game);
+                }
+
+                OpenMetadataComboBox = true;
             }
         }
 
@@ -1641,11 +1651,11 @@ namespace LaunchBoxRomPatchManager.ViewModel
                 selectedLaunchBoxMetadataGame = value;
                 OnPropertyChanged("SelectedLaunchBoxMetadataGame");
 
-                InitializeFromLauncBoxMetadataGame();
+                InitializeFromLaunchBoxMetadataGame();
             }
         }
 
-        private void InitializeFromLauncBoxMetadataGame()
+        private void InitializeFromLaunchBoxMetadataGame()
         {
             if(SelectedLaunchBoxMetadataGame == null)
             {

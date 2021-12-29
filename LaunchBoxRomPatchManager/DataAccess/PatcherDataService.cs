@@ -12,7 +12,7 @@ namespace LaunchBoxRomPatchManager.DataAccess
 {
     public sealed class PatcherDataService
     {
-        private string StorageFile = DirectoryInfoHelper.Instance.RomPatcherDataFilePath;
+        private readonly string StorageFile = DirectoryInfoHelper.Instance.RomPatcherDataFilePath;
 
         public async Task<Patcher> GetPatcherByIdAsync(string patcherId)
         {
